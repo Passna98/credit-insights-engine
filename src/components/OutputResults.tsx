@@ -33,7 +33,8 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
 
   const sections = [
     {
-      title: "FINANCIAL PERFORMANCE",
+      title: "1. FINANCIAL PERFORMANCE",
+      subtitle: "(Amount in Cr.)",
       metrics: [
         "Total Operating Income",
         "EBITDA", 
@@ -42,28 +43,147 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
         "Other Income",
         "Extraordinary expense",
         "Profit before tax",
+        "Current Tax",
+        "Deferred Tax",
         "Profit after tax",
-        "Cash Profits (GCA)"
+        "Cash Profits (GCA)",
+        "CFOA",
+        "CFOA/EBITDA"
       ]
     },
     {
-      title: "CAPITAL STRUCTURE", 
+      title: "2. CAPITAL STRUCTURE", 
+      subtitle: "(Amount in Cr.)",
       metrics: [
+        "Share Capital",
         "Tangible networth (TNW)",
         "Total debt",
+        "- Term debt",
+        "- Working capital debt",
+        "- Vehicle loans",
+        "- Unsecured loans",
         "Capital employed",
-        "Liquidity (Unencumbered)"
+        "Liquidity (Unencumbered)",
+        "Total outside liabilities (TOL)"
       ]
     },
     {
-      title: "KEY RATIOS",
+      title: "3. KEY RATIOS",
+      subtitle: "GROWTH RATIOS",
       metrics: [
         "Sales growth",
+        "EBITDA growth",
+        "PBT growth",
+        "PAT growth"
+      ]
+    },
+    {
+      title: "4. PROFITABILITY RATIOS",
+      subtitle: "",
+      metrics: [
         "EBITDA Margin",
-        "PAT Margin",
+        "PBT margin",
+        "PAT Margin"
+      ]
+    },
+    {
+      title: "5. RETURN RATIOS",
+      subtitle: "",
+      metrics: [
         "Return on Capital Employed",
-        "Debt Equity ratio", 
-        "Interest Coverage Ratio"
+        "Return on Equity"
+      ]
+    },
+    {
+      title: "6. SOLVENCY RATIOS/COVERAGE RATIOS",
+      subtitle: "",
+      metrics: [
+        "Cash Profits/Debt Repay",
+        "Debt Equity ratio",
+        "Overall gearing",
+        "TOL/TNW",
+        "Interest Coverage Ratio",
+        "Debt Service Coverage Ratio",
+        "Total debt/Cash Profits",
+        "Term debt/Cash Profits",
+        "Total debt/EBITDA (Lev.)"
+      ]
+    },
+    {
+      title: "7. LIQUIDITY RATIOS / TURNOVER RATIOS",
+      subtitle: "",
+      metrics: [
+        "Current Ratio",
+        "Average debtor (days)",
+        "Average inventory (days)",
+        "Average payable (days)",
+        "Operating cycle (days)",
+        "Fixed Assets Turnover Ratio"
+      ]
+    },
+    {
+      title: "8. OTHER DETAILS",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Total current assets",
+        "Total current liabilities",
+        "Gross Debtors",
+        "Inventory",
+        "Creditors",
+        "Cost of goods sold",
+        "Cost of sales",
+        "Gross block of Fixed Assets",
+        "Gross Debt availed",
+        "Capex for creditors",
+        "Capex",
+        "Repayment of TL",
+        "Repayment of Vehicle loans"
+      ]
+    },
+    {
+      title: "9. DSCR",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Cash Profits (GCA)",
+        "Add: Interest",
+        "Cash available for debt servicing (A)",
+        "Interest payment",
+        "Principal repayment",
+        "Total debt servicing (B)",
+        "DSCR (A/B)"
+      ]
+    },
+    {
+      title: "10. CAPEX AND ITS FINANCING",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Incremental capex",
+        "Effect of capex adv. & cred.",
+        "Total term debt availed",
+        "Funded from term debt",
+        "Funded from unsec. loan",
+        "Funded from equity infusion",
+        "Funded from Internal Accruals"
+      ]
+    },
+    {
+      title: "11. DETAILS OF TERM DEBT",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Opening debt",
+        "Add: Debt availed-other",
+        "Less: Repayments",
+        "Closing debt"
+      ]
+    },
+    {
+      title: "12. DETAILS OF VEHICLE LOANS",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Opening debt",
+        "Add: Debt availed-other",
+        "Less: Repayments",
+        "Closing debt"
       ]
     }
   ];
@@ -81,15 +201,22 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
           <div className="space-y-6">
             {sections.map((section, sectionIndex) => (
               <div key={sectionIndex} className="space-y-2">
-                <h3 className="text-lg font-semibold text-primary border-b pb-2">
-                  {section.title}
-                </h3>
+                <div className="border-b pb-2">
+                  <h3 className="text-lg font-semibold text-primary">
+                    {section.title}
+                  </h3>
+                  {section.subtitle && (
+                    <p className="text-sm text-muted-foreground italic">
+                      {section.subtitle}
+                    </p>
+                  )}
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr>
                         <th className="text-left p-3 border-b font-semibold bg-muted min-w-[250px]">
-                          Metric
+                          Particulars
                         </th>
                         {years.map(year => (
                           <th key={year} className="text-center p-3 border-b font-semibold bg-muted min-w-[120px]">
@@ -100,21 +227,19 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
                     </thead>
                     <tbody>
                       {section.metrics.map((metric, index) => (
-                        results[metric] && (
-                          <tr key={index} className={`hover:bg-muted/50 ${getRowColor(metric)}`}>
-                            <td className="p-3 border-b font-medium">
-                              {metric}
+                        <tr key={index} className={`hover:bg-muted/50 ${getRowColor(metric)}`}>
+                          <td className="p-3 border-b font-medium">
+                            {metric}
+                          </td>
+                          {years.map(year => (
+                            <td key={year} className="p-3 border-b text-right font-mono">
+                              {results[metric] && results[metric][year] !== undefined 
+                                ? formatNumber(results[metric][year])
+                                : '-'
+                              }
                             </td>
-                            {years.map(year => (
-                              <td key={year} className="p-3 border-b text-right font-mono">
-                                {results[metric][year] !== undefined 
-                                  ? formatNumber(results[metric][year])
-                                  : '-'
-                                }
-                              </td>
-                            ))}
-                          </tr>
-                        )
+                          ))}
+                        </tr>
                       ))}
                     </tbody>
                   </table>
@@ -122,18 +247,18 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
               </div>
             ))}
             
-            {/* Additional metrics not in sections */}
+            {/* Additional metrics not in predefined sections */}
             {Object.keys(results).length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-primary border-b pb-2">
-                  OTHER METRICS
+                  OTHER CALCULATED METRICS
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr>
                         <th className="text-left p-3 border-b font-semibold bg-muted min-w-[250px]">
-                          Metric
+                          Particulars
                         </th>
                         {years.map(year => (
                           <th key={year} className="text-center p-3 border-b font-semibold bg-muted min-w-[120px]">
