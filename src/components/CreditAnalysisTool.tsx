@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -33,10 +32,36 @@ export const CreditAnalysisTool: React.FC = () => {
   };
 
   const calculateResults = () => {
+    console.log('Starting calculations with formData:', formData);
     const newResults: FormData = {};
     
+    // Initialize all metrics
+    const allMetrics = [
+      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense",
+      "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
+      "Share Capital", "Tangible networth (TNW)", "Total debt", "- Term debt", "- Working capital debt", "- Vehicle loans", "- Unsecured loans",
+      "Capital employed", "Liquidity (Unencumbered)", "Total outside liabilities (TOL)",
+      "Sales growth", "EBITDA growth", "PBT growth", "PAT growth",
+      "EBITDA Margin", "PBT margin", "PAT Margin",
+      "Return on Capital Employed", "Return on Equity",
+      "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio",
+      "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)",
+      "Current Ratio", "Average debtor (days)", "Average inventory (days)", "Average payable (days)", "Operating cycle (days)", "Fixed Assets Turnover Ratio",
+      "Total current assets", "Total current liabilities", "Gross Debtors", "Inventory", "Creditors", "Cost of goods sold", "Cost of sales",
+      "Gross block of Fixed Assets", "Gross Debt availed", "Capex for creditors", "Capex", "Repayment of TL", "Repayment of Vehicle loans",
+      "Cash available for debt servicing (A)", "Interest payment", "Principal repayment", "Total debt servicing (B)", "DSCR (A/B)",
+      "Incremental capex", "Effect of capex adv. & cred.", "Total term debt availed", "Funded from term debt", "Funded from unsec. loan", "Funded from equity infusion", "Funded from Internal Accruals",
+      "Opening debt", "Add: Debt availed-other", "Less: Repayments", "Closing debt"
+    ];
+
+    allMetrics.forEach(metric => {
+      newResults[metric] = {};
+    });
+    
     years.forEach((year, idx) => {
-      // Basic calculations
+      console.log(`Calculating for year ${year}:`);
+      
+      // Basic P&L calculations
       const grossSalesTotal = getFieldValue("1. Gross Sales - Total", year);
       const excise = getFieldValue("2. Less Excise Duty/cess if any", year);
       const netSales = grossSalesTotal - excise;
@@ -46,14 +71,19 @@ export const CreditAnalysisTool: React.FC = () => {
       const otherOpIncome2 = getFieldValue("4. Other operating/revenue income - Other Operating Income 2", year);
       const otherOpTotal = rentalIncome + otherOpIncome1 + otherOpIncome2;
       
+      // Total Operating Income (C5)
       const totalOperatingIncome = netSales + otherOpTotal;
+      console.log(`Total Operating Income for ${year}:`, totalOperatingIncome);
       
-      const depreciation = getFieldValue("vi. Depreciation", year);
-      const amortisation = getFieldValue("vii. Amortisation", year);
-      
+      // EBITDA calculation (C6)
       const costOfSales = getFieldValue("8. Sub-total (6+7) Cost of sales", year);
       const operatingProfitBeforeInterest = totalOperatingIncome - costOfSales;
+      const depreciation = getFieldValue("vi. Depreciation", year);
+      const amortisation = getFieldValue("vii. Amortisation", year);
+      const ebitda = operatingProfitBeforeInterest + depreciation + amortisation;
+      console.log(`EBITDA for ${year}:`, ebitda);
       
+      // Interest calculation (C8)
       const totalFinanceCharges = [
         "10. Finance Charges - Interest on Term Loans",
         "10. Finance Charges - Interest on WCTL and DLOD", 
@@ -62,8 +92,7 @@ export const CreditAnalysisTool: React.FC = () => {
         "10. Finance Charges - Bank Charges/Others"
       ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
       
-      const ebitda = operatingProfitBeforeInterest + depreciation + amortisation;
-      
+      // Other Income (C9)
       const otherIncome = [
         "12. Other non-operating Income - Dividends received",
         "12. Other non-operating Income - Extraordinary gains",
@@ -75,6 +104,7 @@ export const CreditAnalysisTool: React.FC = () => {
         "12. Other non-operating Income - Rental Income"
       ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
       
+      // Extraordinary expenses (C10)
       const otherExpenses = [
         "12. Other non-operating expenses - Prior Period Items",
         "12. Other non-operating expenses - Extraordinary Losses",
@@ -86,16 +116,21 @@ export const CreditAnalysisTool: React.FC = () => {
         "12. Other non-operating expenses - Others"
       ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
       
+      // Profit before tax (C11)
       const profitBeforeTax = operatingProfitBeforeInterest - totalFinanceCharges + otherIncome - otherExpenses;
+      console.log(`Profit before tax for ${year}:`, profitBeforeTax);
       
-      const currentTax = getFieldValue("14. Tax - Provision for taxes", year);
-      const deferredTax = getFieldValue("14. Tax - Deferred Tax", year);
+      // Tax calculations
+      const currentTax = getFieldValue("14. Tax - Provision for taxes", year); // C12
+      const deferredTax = getFieldValue("14. Tax - Deferred Tax", year); // C13
       
-      // PAT = Profit before Tax – (Current Tax + Deferred Tax)
-      const profitAfterTax = profitBeforeTax - (currentTax + deferredTax);
+      // PAT calculation (C14) = C11 - C12 - C13
+      const profitAfterTax = profitBeforeTax - currentTax - deferredTax;
+      console.log(`PAT for ${year}:`, profitAfterTax);
       
-      // Cash Profit (GCA) = Profit After Tax + Deferred Tax + Depreciation
+      // Cash Profit (GCA) calculation (C15) = C14 + C13 + C7
       const cashProfits = profitAfterTax + deferredTax + depreciation;
+      console.log(`Cash Profits (GCA) for ${year}:`, cashProfits);
       
       // Capital Structure calculations
       const ordinaryShareCapital = getFieldValue("15. Ordinary Share Capital (including premium)", year);
@@ -107,32 +142,42 @@ export const CreditAnalysisTool: React.FC = () => {
       const surplusPL = getFieldValue("21. Surplus (+) or deficit (-) in Profit & Loss account", year);
       const deferredTaxLiab = getFieldValue("22. Deferred Tax Liability (net)", year);
       
+      // Tangible networth (TNW) (C20)
       const tangibleNetWorth = ordinaryShareCapital + shareWarrants + sharePremiumClosing + 
                               generalReserveClosing + capitalReserveClosing + otherReserves + 
                               surplusPL + deferredTaxLiab;
+      console.log(`TNW for ${year}:`, tangibleNetWorth);
       
-      // Term Debt = Instalments of CAPEX + Term loan
+      // Debt calculations based on your formulas
+      // Term Debt (C23) = Instalments of CAPEX + Term loan
       const termDebt = getFieldValue("5C. Instalments of CAPEX linked Term Loans/Debentures/Preference shares/Deposits/Other debts (due within 1 yr)(including lease liability)(linked to Repayment schedules)", year) + 
                        getFieldValue("9A. Term Loans (excluding installments payable within 1 year and WCTL)", year);
       
-      // Working Capital Debt = Short term debt from bank
+      // Working Capital Debt (C25) = Short term debt from bank
       const workingCapitalDebt = getFieldValue("1. Short-term finance from banks - Sub-total (A)", year);
       
-      // Vehicle Loans = Instalment of Vehicle loan + vehicle loan
+      // Vehicle Loans (C26) = Instalment of Vehicle loan + vehicle loan
       const vehicleLoans = getFieldValue("5A. Instalments of Vehicle loans (due within 1 yr)(including lease liability)(linked to Repayment schedules)", year) + 
                           getFieldValue("9C. Vehicle loans", year);
       
-      // Unsecured loans = Unsecured loan – unsecured loan eligible for QE classification
+      // Unsecured loans (C27) = Unsecured loan – unsecured loan eligible for QE classification
       const unsecuredLoans = getFieldValue("11. Unsecured loans", year) - getFieldValue("Unsecured Loans eligible for QE classification", year);
       
-      // Total Debt = Term debt + Working Capital Debt + Vehicle Loan + Unsecured Loans
+      // Total Debt (C22) = C23 + C25 + C26 + C27
       const totalDebt = termDebt + workingCapitalDebt + vehicleLoans + unsecuredLoans;
+      console.log(`Total Debt for ${year}:`, totalDebt);
       
-      // Capital employed = Tangible networth(TNW) + Total Debt
+      // Capital employed (C29) = C20 + C22
       const capitalEmployed = tangibleNetWorth + totalDebt;
       
       const cashAndBank = getFieldValue("26. Cash and Bank Balances (unencumbered)", year);
       const totalOutsideLibabilities = getFieldValue("14. Total Outside Liabilities (7 + 13)", year);
+      
+      // Repayment calculations
+      const repaymentTL = getFieldValue("Repayment of TL", year);
+      const repaymentVehicle = getFieldValue("Repayment of Vehicle loans", year);
+      const repaymentWCTL = getFieldValue("Repayment of WCTL", year);
+      const totalRepayments = repaymentTL + repaymentVehicle + repaymentWCTL;
       
       // Growth calculations
       let salesGrowth = 0;
@@ -161,34 +206,30 @@ export const CreditAnalysisTool: React.FC = () => {
       const returnOnCapitalEmployed = capitalEmployed ? (ebitda / capitalEmployed) * 100 : 0;
       const returnOnEquity = tangibleNetWorth ? (profitAfterTax / tangibleNetWorth) * 100 : 0;
       
-      // Cash Profit/Debt Repay = Cash Profit(GCA)/(Payment of TL+ Repayment of Vehicle loan+ Repayment of WCTL)
-      const repaymentTL = getFieldValue("Repayment of TL", year);
-      const repaymentVehicle = getFieldValue("Repayment of Vehicle loans", year);
-      const repaymentWCTL = getFieldValue("Repayment of WCTL", year);
-      const totalRepayments = repaymentTL + repaymentVehicle + repaymentWCTL;
+      // Cash Profit/Debt Repay (C48) = C15/(C88+C89+C90)
       const cashProfitsDebtRepay = totalRepayments ? cashProfits / totalRepayments : 0;
       
       const debtEquityRatio = tangibleNetWorth ? totalDebt / tangibleNetWorth : 0;
-      // Overall Gearing = Total Debt/Tangible networth(TNW)
+      // Overall Gearing (C50) = C22/C20
       const overallGearing = tangibleNetWorth ? totalDebt / tangibleNetWorth : 0;
       const tolTnwRatio = tangibleNetWorth ? totalOutsideLibabilities / tangibleNetWorth : 0;
       const interestCoverageRatio = totalFinanceCharges ? ebitda / totalFinanceCharges : 0;
       
       const dscr = (cashProfits + totalFinanceCharges) / (totalFinanceCharges + totalRepayments);
       
-      // Total debt/Cash profit = Total Debt/Cash Profit (GCA)
+      // Total debt/Cash profit (C54) = C22/C15
       const totalDebtCashProfits = cashProfits ? totalDebt / cashProfits : 0;
-      // Term Debt/cash profit = Term Debt/Cash profit(GCA)
+      // Term Debt/cash profit (C55) = C23/C15
       const termDebtCashProfits = cashProfits ? termDebt / cashProfits : 0;
-      // Total Debt/EBITDA(Lev.) = Total Debt/ EBITDA
+      // Total Debt/EBITDA (C56) = C22/C6
       const totalDebtEbitda = ebitda ? totalDebt / ebitda : 0;
       
-      // Current Ratio = Total Current Assets/Total Current Liabilities
+      // Current Ratio (C60) = C72/C73
       const totalCurrentAssets = getFieldValue("31. Total Current Assets (26 to 30)", year);
       const totalCurrentLiabilities = getFieldValue("7. Total current liabilities (A + B)", year);
       const currentRatio = totalCurrentLiabilities ? totalCurrentAssets / totalCurrentLiabilities : 0;
       
-      // Average Debtor(days) = 365/(Total Operating income/(Gross debtor of this year + Gross debtor of previous year)/2)
+      // Average Debtor(days) (C62) = ROUND(365/(C5/((B74+C74)/2)),0)
       const grossDebtors = getFieldValue("28. Sundry Debtors -LESS THAN 6 MONTHS OLD", year);
       let averageDebtorDays = 0;
       if (idx > 0) {
@@ -199,7 +240,7 @@ export const CreditAnalysisTool: React.FC = () => {
         }
       }
       
-      // Similar calculations for inventory and payables
+      // Similar calculations for inventory
       const inventory = getFieldValue("29. Inventory", year);
       let averageInventoryDays = 0;
       if (idx > 0) {
@@ -210,9 +251,9 @@ export const CreditAnalysisTool: React.FC = () => {
         }
       }
       
-      // Average payable(days) = 365/(cost of sale/(Creditor of this year + Creditor of previous year)/2)
+      // Average payable(days) (C64) = ROUND(365/(C80/((B77+C77)/2)),0)
       const creditors = getFieldValue("3. Sundry Creditors (Trade)", year);
-      // Cost Of sale = Cost of sale – depreciation – amortization
+      // Cost Of sale (C80) = Cost of sale – depreciation – amortization
       const adjustedCostOfSale = costOfSales - depreciation - amortisation;
       let averagePayableDays = 0;
       if (idx > 0) {
@@ -223,10 +264,10 @@ export const CreditAnalysisTool: React.FC = () => {
         }
       }
       
-      // Operating Cycle(days) = Average Debtor(days)+ Average Inventory(days) - Average Payable(days)
+      // Operating Cycle(days) (C65) = C62+C63-C64
       const operatingCycleDays = averageDebtorDays + averageInventoryDays - averagePayableDays;
       
-      // Fixed Assets Turnover Ratio = Total operating income/(Net block of fixed assets of this year+ Net Block of Fixed assets of previous year)/2
+      // Fixed Assets Turnover Ratio (C70) = C5/((B87+C87)/2)
       const netBlock = getFieldValue("35. Net Block (32 + 33 - 34)", year);
       let fixedAssetsTurnoverRatio = 0;
       if (idx > 0) {
@@ -235,29 +276,6 @@ export const CreditAnalysisTool: React.FC = () => {
         if (avgNetBlock) {
           fixedAssetsTurnoverRatio = totalOperatingIncome / avgNetBlock;
         }
-      }
-      
-      // Initialize result arrays if they don't exist
-      if (!newResults["Total Operating Income"]) {
-        [
-          "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense",
-          "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
-          "Share Capital", "Tangible networth (TNW)", "Total debt", "- Term debt", "- Working capital debt", "- Vehicle loans", "- Unsecured loans",
-          "Capital employed", "Liquidity (Unencumbered)", "Total outside liabilities (TOL)",
-          "Sales growth", "EBITDA growth", "PBT growth", "PAT growth",
-          "EBITDA Margin", "PBT margin", "PAT Margin",
-          "Return on Capital Employed", "Return on Equity",
-          "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio",
-          "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)",
-          "Current Ratio", "Average debtor (days)", "Average inventory (days)", "Average payable (days)", "Operating cycle (days)", "Fixed Assets Turnover Ratio",
-          "Total current assets", "Total current liabilities", "Gross Debtors", "Inventory", "Creditors", "Cost of goods sold", "Cost of sales",
-          "Gross block of Fixed Assets", "Gross Debt availed", "Capex for creditors", "Capex", "Repayment of TL", "Repayment of Vehicle loans",
-          "Cash Profits (GCA)", "Add: Interest", "Cash available for debt servicing (A)", "Interest payment", "Principal repayment", "Total debt servicing (B)", "DSCR (A/B)",
-          "Incremental capex", "Effect of capex adv. & cred.", "Total term debt availed", "Funded from term debt", "Funded from unsec. loan", "Funded from equity infusion", "Funded from Internal Accruals",
-          "Opening debt", "Add: Debt availed-other", "Less: Repayments", "Closing debt"
-        ].forEach(metric => {
-          if (!newResults[metric]) newResults[metric] = {};
-        });
       }
       
       // Store all calculated values
@@ -330,17 +348,28 @@ export const CreditAnalysisTool: React.FC = () => {
       newResults["Repayment of Vehicle loans"][year] = repaymentVehicle;
       
       // DSCR calculations
-      newResults["Cash Profits (GCA)"][year] = cashProfits;
-      newResults["Add: Interest"][year] = totalFinanceCharges;
       newResults["Cash available for debt servicing (A)"][year] = cashProfits + totalFinanceCharges;
       newResults["Interest payment"][year] = totalFinanceCharges;
       newResults["Principal repayment"][year] = totalRepayments;
       newResults["Total debt servicing (B)"][year] = totalFinanceCharges + totalRepayments;
       newResults["DSCR (A/B)"][year] = dscr;
       
-      // Additional calculations for other sections would go here...
+      // Additional calculations for other sections
+      newResults["Incremental capex"][year] = getFieldValue("Incremental capex", year);
+      newResults["Effect of capex adv. & cred."][year] = getFieldValue("Effect of capex adv. & cred.", year);
+      newResults["Total term debt availed"][year] = getFieldValue("Total term debt availed", year);
+      newResults["Funded from term debt"][year] = getFieldValue("Funded from term debt", year);
+      newResults["Funded from unsec. loan"][year] = getFieldValue("Funded from unsec. loan", year);
+      newResults["Funded from equity infusion"][year] = getFieldValue("Funded from equity infusion", year);
+      newResults["Funded from Internal Accruals"][year] = getFieldValue("Funded from Internal Accruals", year);
+      
+      newResults["Opening debt"][year] = getFieldValue("Opening debt", year);
+      newResults["Add: Debt availed-other"][year] = getFieldValue("Add: Debt availed-other", year);
+      newResults["Less: Repayments"][year] = getFieldValue("Less: Repayments", year);
+      newResults["Closing debt"][year] = getFieldValue("Closing debt", year);
     });
     
+    console.log('Final results:', newResults);
     setResults(newResults);
     toast.success("Calculations completed successfully!");
   };
