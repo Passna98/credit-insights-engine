@@ -61,117 +61,137 @@ export const CreditAnalysisTool: React.FC = () => {
     years.forEach((year, idx) => {
       console.log(`Calculating for year ${year}:`);
       
-      // Basic P&L calculations
+      // Basic P&L calculations using correct field names
       const grossSalesTotal = getFieldValue("1. Gross Sales - Total", year);
-      const excise = getFieldValue("2. Less Excise Duty/cess if any", year);
-      const netSales = grossSalesTotal - excise;
+      const exciseDuty = getFieldValue("2. Less Excise Duty/cess if any", year);
+      const netSales = grossSalesTotal - exciseDuty;
+      console.log(`Net Sales for ${year}:`, netSales);
       
-      const rentalIncome = getFieldValue("4. Other operating/revenue income - Rental Income", year);
-      const otherOpIncome1 = getFieldValue("4. Other operating/revenue income - Other Operating Income 1", year);
-      const otherOpIncome2 = getFieldValue("4. Other operating/revenue income - Other Operating Income 2", year);
-      const otherOpTotal = rentalIncome + otherOpIncome1 + otherOpIncome2;
+      // Other operating income
+      const rentalIncome = getFieldValue("4. Other operating/revenue income - i. Rental Income", year);
+      const otherOpIncome1 = getFieldValue("4. Other operating/revenue income - ii. Other Operating Income (Pls specify)", year);
+      const otherOpIncome2 = getFieldValue("4. Other operating/revenue income - iii. Other Operating Income (Pls specify)", year);
+      const otherOpIncomeTotal = getFieldValue("4. Other operating/revenue income - Total", year) || (rentalIncome + otherOpIncome1 + otherOpIncome2);
       
-      // Total Operating Income (C5)
-      const totalOperatingIncome = netSales + otherOpTotal;
+      // Total Operating Income = Net Sales + Other Operating Income
+      const totalOperatingIncome = netSales + otherOpIncomeTotal;
       console.log(`Total Operating Income for ${year}:`, totalOperatingIncome);
       
-      // EBITDA calculation (C6)
+      // Cost of sales calculation
       const costOfSales = getFieldValue("8. Sub-total (6+7) Cost of sales", year);
+      console.log(`Cost of Sales for ${year}:`, costOfSales);
+      
+      // Operating Profit before Interest = Total Operating Income - Cost of Sales
       const operatingProfitBeforeInterest = totalOperatingIncome - costOfSales;
-      const depreciation = getFieldValue("vi. Depreciation", year);
-      const amortisation = getFieldValue("vii. Amortisation", year);
+      console.log(`Operating Profit before Interest for ${year}:`, operatingProfitBeforeInterest);
+      
+      // Depreciation and Amortization
+      const depreciation = getFieldValue("6. vi. Depreciation", year);
+      const amortisation = getFieldValue("6. vii. Amortisation", year);
+      
+      // EBITDA = Operating Profit + Depreciation + Amortization
       const ebitda = operatingProfitBeforeInterest + depreciation + amortisation;
       console.log(`EBITDA for ${year}:`, ebitda);
       
-      // Interest calculation (C8)
-      const totalFinanceCharges = [
-        "10. Finance Charges - Interest on Term Loans",
-        "10. Finance Charges - Interest on WCTL and DLOD", 
-        "10. Finance Charges - Interest on CC",
-        "10. Finance Charges - Interest vehicle loans",
-        "10. Finance Charges - Bank Charges/Others"
-      ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
+      // Interest calculation
+      const interestTL = getFieldValue("10. i. Interest on Term Loans(Link from Repay Sch)", year);
+      const interestWCTL = getFieldValue("10. ii. Interest on WCTL and DLOD", year);  
+      const interestCC = getFieldValue("10. iii. Interest on CC", year);
+      const interestVehicle = getFieldValue("10. iv. Interest on vehicle loans", year);
+      const bankCharges = getFieldValue("10. v. Bank Charges/Others", year);
+      const totalInterest = interestTL + interestWCTL + interestCC + interestVehicle + bankCharges;
+      console.log(`Total Interest for ${year}:`, totalInterest);
       
-      // Other Income (C9)
-      const otherIncome = [
-        "12. Other non-operating Income - Dividends received",
-        "12. Other non-operating Income - Extraordinary gains",
-        "12. Other non-operating Income - Profit on sale of fixed assets / Investments",
-        "12. Other non-operating Income - Gain on Exchange Fluctuations",
-        "12. Other non-operating Income - Misc. income/ Write backs etc",
-        "12. Other non-operating Income - Interest from subsidiary",
-        "12. Other non-operating Income - Other Income",
-        "12. Other non-operating Income - Rental Income"
-      ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
+      // Other Income
+      const dividendsReceived = getFieldValue("12. i. Dividends received", year);
+      const extraordinaryGains = getFieldValue("12. ii. Extraordinary gains", year);
+      const profitOnSale = getFieldValue("12. iii. Profit on sale of fixed assets / Investments", year);
+      const gainExchange = getFieldValue("12. iv. Gain on Exchange Fluctuations", year);
+      const miscIncome = getFieldValue("12. v. Misc. income/ Write backs etc", year);
+      const interestSubsidiary = getFieldValue("12. vi. Interest from subsidiary", year);
+      const otherIncome = getFieldValue("12. vii. Other Income", year);
+      const rentalIncomeNonOp = getFieldValue("12. viii. Rental Income", year);
+      const totalOtherIncome = dividendsReceived + extraordinaryGains + profitOnSale + gainExchange + miscIncome + interestSubsidiary + otherIncome + rentalIncomeNonOp;
+      console.log(`Total Other Income for ${year}:`, totalOtherIncome);
       
-      // Extraordinary expenses (C10)
-      const otherExpenses = [
-        "12. Other non-operating expenses - Prior Period Items",
-        "12. Other non-operating expenses - Extraordinary Losses",
-        "12. Other non-operating expenses - Loss on sale of fixed assets",
-        "12. Other non-operating expenses - Loss on Exchange Fluctuations",
-        "12. Other non-operating expenses - Write Offs/ Misc expenses write offs",
-        "12. Other non-operating expenses - Stock Writeoff on account of Covid",
-        "12. Other non-operating expenses - Exceptional Items",
-        "12. Other non-operating expenses - Others"
-      ].reduce((sum, field) => sum + getFieldValue(field, year), 0);
+      // Other Expenses
+      const priorPeriodItems = getFieldValue("12. i. Prior Period Items", year);
+      const extraordinaryLosses = getFieldValue("12. ii. Extraordinary Losses", year);
+      const lossOnSale = getFieldValue("12. iii. Loss on sale of fixed assets", year);
+      const lossExchange = getFieldValue("12. iv. Loss on Exchange Fluctuations", year);
+      const writeOffs = getFieldValue("12. v. Write Offs/ Misc expenses write offs", year);
+      const stockWriteoff = getFieldValue("12. vi. Stock Writeoff on account of Covid", year);
+      const exceptionalItems = getFieldValue("12. vii. Exceptional Items", year);
+      const otherExpenses = getFieldValue("12. viii. Others (Pls specify)", year);
+      const totalOtherExpenses = priorPeriodItems + extraordinaryLosses + lossOnSale + lossExchange + writeOffs + stockWriteoff + exceptionalItems + otherExpenses;
+      console.log(`Total Other Expenses for ${year}:`, totalOtherExpenses);
       
-      // Profit before tax (C11)
-      const profitBeforeTax = operatingProfitBeforeInterest - totalFinanceCharges + otherIncome - otherExpenses;
+      // Profit before tax = Operating Profit - Interest + Other Income - Other Expenses
+      const profitBeforeTax = operatingProfitBeforeInterest - totalInterest + totalOtherIncome - totalOtherExpenses;
       console.log(`Profit before tax for ${year}:`, profitBeforeTax);
       
       // Tax calculations
-      const currentTax = getFieldValue("14. Tax - Provision for taxes", year); // C12
-      const deferredTax = getFieldValue("14. Tax - Deferred Tax", year); // C13
+      const currentTax = getFieldValue("14. i. Provision for taxes", year);
+      const deferredTax = getFieldValue("14. ii. Deferred Tax", year);
+      const previousYearAdj = getFieldValue("14. iii. Previous year adjustments", year);
+      const totalTax = currentTax + deferredTax + previousYearAdj;
       
-      // PAT calculation (C14) = C11 - C12 - C13
-      const profitAfterTax = profitBeforeTax - currentTax - deferredTax;
+      // PAT = PBT - Total Tax
+      const profitAfterTax = profitBeforeTax - totalTax;
       console.log(`PAT for ${year}:`, profitAfterTax);
       
-      // Cash Profit (GCA) calculation (C15) = C14 + C13 + C7
-      const cashProfits = profitAfterTax + deferredTax + depreciation;
+      // Cash Profit (GCA) = PAT + Depreciation + Amortization + Deferred Tax
+      const cashProfits = profitAfterTax + depreciation + amortisation + deferredTax;
       console.log(`Cash Profits (GCA) for ${year}:`, cashProfits);
       
-      // Capital Structure calculations
+      // Balance Sheet calculations
       const ordinaryShareCapital = getFieldValue("15. Ordinary Share Capital (including premium)", year);
       const shareWarrants = getFieldValue("16. Share Warrants", year);
-      const sharePremiumClosing = getFieldValue("Closing", year);
-      const generalReserveClosing = getFieldValue("18. General Reserve - Closing", year);
-      const capitalReserveClosing = getFieldValue("19. Capital Reserve - Closing", year);
-      const otherReserves = getFieldValue("20. Other Reserves (Ind AS adjustments)", year);
-      const surplusPL = getFieldValue("21. Surplus (+) or deficit (-) in Profit & Loss account", year);
-      const deferredTaxLiab = getFieldValue("22. Deferred Tax Liability (net)", year);
+      const sharePremiumClosing = getFieldValue("17. Closing", year);
+      const generalReserveClosing = getFieldValue("18. Closing", year);
+      const capitalReserveClosing = getFieldValue("19. Closing", year);
+      const otherReserves = getFieldValue("20. Other Reserves (Ind AS Adjustment)", year);
+      const surplusPL = getFieldValue("21. Surplus (+) or deficit (-) in Profit & Loss a/c", year);
+      const deferredTaxLiab = getFieldValue("22. Deferred Tax Liability (Net)", year);
+      const capitalSubsidy = getFieldValue("23. i. Capital Subsidy", year);
+      const shareApplicationMoney = getFieldValue("23. ii. Share Application Money", year);
+      const shareSuspense = getFieldValue("23. iv. Share Suspense", year);
       
-      // Tangible networth (TNW) (C20)
+      // Tangible Net Worth = Sum of all equity components (excluding intangible assets)
       const tangibleNetWorth = ordinaryShareCapital + shareWarrants + sharePremiumClosing + 
                               generalReserveClosing + capitalReserveClosing + otherReserves + 
-                              surplusPL + deferredTaxLiab;
+                              surplusPL + deferredTaxLiab + capitalSubsidy + shareApplicationMoney + shareSuspense;
       console.log(`TNW for ${year}:`, tangibleNetWorth);
       
-      // Debt calculations based on your formulas
-      // Term Debt (C23) = Instalments of CAPEX + Term loan
-      const termDebt = getFieldValue("5C. Instalments of CAPEX linked Term Loans/Debentures/Preference shares/Deposits/Other debts (due within 1 yr)(including lease liability)(linked to Repayment schedules)", year) + 
-                       getFieldValue("9A. Term Loans (excluding installments payable within 1 year and WCTL)", year);
+      // Debt calculations
+      // Term Debt = Term Loans + Installments of Term Loans due within 1 year
+      const termLoansLT = getFieldValue("9A. Term Loans (excluding instalments payable within 1 year and WCTL)", year);
+      const termLoanInstallments = getFieldValue("5C. Instalments of CAPEX linked Term Loans/ Debentures/ Preference Shares/ Deposits/ Other debts (due within 1 yr) (including lease liability) (Linked to Repayment schedules)", year);
+      const termDebt = termLoansLT + termLoanInstallments;
       
-      // Working Capital Debt (C25) = Short term debt from bank
-      const workingCapitalDebt = getFieldValue("1. Short-term finance from banks - Sub-total (A)", year);
+      // Working Capital Debt = Short term finance from banks
+      const workingCapitalDebt = getFieldValue("1. Sub-total [i + iii] (A)", year);
       
-      // Vehicle Loans (C26) = Instalment of Vehicle loan + vehicle loan
-      const vehicleLoans = getFieldValue("5A. Instalments of Vehicle loans (due within 1 yr)(including lease liability)(linked to Repayment schedules)", year) + 
-                          getFieldValue("9C. Vehicle loans", year);
+      // Vehicle Loans = Vehicle loans LT + Vehicle loan installments
+      const vehicleLoansLT = getFieldValue("9C. Vehicle loans", year);
+      const vehicleLoanInstallments = getFieldValue("5A. Instalments of Vehicle loans (due within 1 yr) (including lease liability) (Linked to Repayment schedules)", year);
+      const vehicleLoans = vehicleLoansLT + vehicleLoanInstallments;
       
-      // Unsecured loans (C27) = Unsecured loan – unsecured loan eligible for QE classification
-      const unsecuredLoans = getFieldValue("11. Unsecured loans", year) - getFieldValue("Unsecured Loans eligible for QE classification", year);
+      // Unsecured loans
+      const unsecuredLoans = getFieldValue("11. Unsecured loans", year);
       
-      // Total Debt (C22) = C23 + C25 + C26 + C27
+      // Total Debt = Term Debt + Working Capital Debt + Vehicle Loans + Unsecured Loans
       const totalDebt = termDebt + workingCapitalDebt + vehicleLoans + unsecuredLoans;
       console.log(`Total Debt for ${year}:`, totalDebt);
       
-      // Capital employed (C29) = C20 + C22
+      // Capital employed = TNW + Total Debt
       const capitalEmployed = tangibleNetWorth + totalDebt;
       
+      // Other values
       const cashAndBank = getFieldValue("26. Cash and Bank Balances (unencumbered)", year);
-      const totalOutsideLibabilities = getFieldValue("14. Total Outside Liabilities (7 + 13)", year);
+      const totalOutsideLibabilities = getFieldValue("14. Total Outside Liabilities [7+13]", year);
+      const totalCurrentAssets = getFieldValue("31. Total Current Assets (26 to 30)", year);
+      const totalCurrentLiabilities = getFieldValue("7. Total current liabilities [A + B]", year);
       
       // Repayment calculations
       const repaymentTL = getFieldValue("Repayment of TL", year);
@@ -199,41 +219,34 @@ export const CreditAnalysisTool: React.FC = () => {
       }
       
       // Ratios
-      const ebitdaMargin = totalOperatingIncome ? (ebitda / totalOperatingIncome) * 100 : 0;
-      const pbtMargin = totalOperatingIncome ? (profitBeforeTax / totalOperatingIncome) * 100 : 0;
-      const patMargin = totalOperatingIncome ? (profitAfterTax / totalOperatingIncome) * 100 : 0;
+      const ebitdaMargin = totalOperatingIncome !== 0 ? (ebitda / totalOperatingIncome) * 100 : 0;
+      const pbtMargin = totalOperatingIncome !== 0 ? (profitBeforeTax / totalOperatingIncome) * 100 : 0;
+      const patMargin = totalOperatingIncome !== 0 ? (profitAfterTax / totalOperatingIncome) * 100 : 0;
       
-      const returnOnCapitalEmployed = capitalEmployed ? (ebitda / capitalEmployed) * 100 : 0;
-      const returnOnEquity = tangibleNetWorth ? (profitAfterTax / tangibleNetWorth) * 100 : 0;
+      const returnOnCapitalEmployed = capitalEmployed !== 0 ? (ebitda / capitalEmployed) * 100 : 0;
+      const returnOnEquity = tangibleNetWorth !== 0 ? (profitAfterTax / tangibleNetWorth) * 100 : 0;
       
       // Cash Profit/Debt Repay (C48) = C15/(C88+C89+C90)
       const cashProfitsDebtRepay = totalRepayments ? cashProfits / totalRepayments : 0;
       
-      const debtEquityRatio = tangibleNetWorth ? totalDebt / tangibleNetWorth : 0;
-      // Overall Gearing (C50) = C22/C20
-      const overallGearing = tangibleNetWorth ? totalDebt / tangibleNetWorth : 0;
-      const tolTnwRatio = tangibleNetWorth ? totalOutsideLibabilities / tangibleNetWorth : 0;
-      const interestCoverageRatio = totalFinanceCharges ? ebitda / totalFinanceCharges : 0;
+      const debtEquityRatio = tangibleNetWorth !== 0 ? totalDebt / tangibleNetWorth : 0;
+      const overallGearing = tangibleNetWorth !== 0 ? totalDebt / tangibleNetWorth : 0;
+      const tolTnwRatio = tangibleNetWorth !== 0 ? totalOutsideLibabilities / tangibleNetWorth : 0;
+      const interestCoverageRatio = totalInterest !== 0 ? ebitda / totalInterest : 0;
       
-      const dscr = (cashProfits + totalFinanceCharges) / (totalFinanceCharges + totalRepayments);
+      const dscr = (cashProfits + totalInterest) / (totalInterest + totalRepayments);
       
-      // Total debt/Cash profit (C54) = C22/C15
-      const totalDebtCashProfits = cashProfits ? totalDebt / cashProfits : 0;
-      // Term Debt/cash profit (C55) = C23/C15
-      const termDebtCashProfits = cashProfits ? termDebt / cashProfits : 0;
-      // Total Debt/EBITDA (C56) = C22/C6
-      const totalDebtEbitda = ebitda ? totalDebt / ebitda : 0;
+      const currentRatio = totalCurrentLiabilities !== 0 ? totalCurrentAssets / totalCurrentLiabilities : 0;
       
-      // Current Ratio (C60) = C72/C73
-      const totalCurrentAssets = getFieldValue("31. Total Current Assets (26 to 30)", year);
-      const totalCurrentLiabilities = getFieldValue("7. Total current liabilities (A + B)", year);
-      const currentRatio = totalCurrentLiabilities ? totalCurrentAssets / totalCurrentLiabilities : 0;
+      const totalDebtCashProfits = cashProfits !== 0 ? totalDebt / cashProfits : 0;
+      const termDebtCashProfits = cashProfits !== 0 ? termDebt / cashProfits : 0;
+      const totalDebtEbitda = ebitda !== 0 ? totalDebt / ebitda : 0;
       
       // Average Debtor(days) (C62) = ROUND(365/(C5/((B74+C74)/2)),0)
-      const grossDebtors = getFieldValue("28. Sundry Debtors -LESS THAN 6 MONTHS OLD", year);
+      const grossDebtors = getFieldValue("28. Sundry Debtors- LESS THAN 6 MONTHS OLD", year);
       let averageDebtorDays = 0;
       if (idx > 0) {
-        const prevGrossDebtors = getFieldValue("28. Sundry Debtors -LESS THAN 6 MONTHS OLD", years[idx - 1]);
+        const prevGrossDebtors = getFieldValue("28. Sundry Debtors- LESS THAN 6 MONTHS OLD", years[idx - 1]);
         const avgDebtors = (grossDebtors + prevGrossDebtors) / 2;
         if (totalOperatingIncome && avgDebtors) {
           averageDebtorDays = Math.round(365 / (totalOperatingIncome / avgDebtors));
@@ -241,10 +254,10 @@ export const CreditAnalysisTool: React.FC = () => {
       }
       
       // Similar calculations for inventory
-      const inventory = getFieldValue("29. Inventory", year);
+      const inventory = getFieldValue("29. Inventory:", year);
       let averageInventoryDays = 0;
       if (idx > 0) {
-        const prevInventory = getFieldValue("29. Inventory", years[idx - 1]);
+        const prevInventory = getFieldValue("29. Inventory:", years[idx - 1]);
         const avgInventory = (inventory + prevInventory) / 2;
         if (costOfSales && avgInventory) {
           averageInventoryDays = Math.round(365 / (costOfSales / avgInventory));
@@ -268,10 +281,10 @@ export const CreditAnalysisTool: React.FC = () => {
       const operatingCycleDays = averageDebtorDays + averageInventoryDays - averagePayableDays;
       
       // Fixed Assets Turnover Ratio (C70) = C5/((B87+C87)/2)
-      const netBlock = getFieldValue("35. Net Block (32 + 33 - 34)", year);
+      const netBlock = getFieldValue("35. Net Block (32+33-34)", year);
       let fixedAssetsTurnoverRatio = 0;
       if (idx > 0) {
-        const prevNetBlock = getFieldValue("35. Net Block (32 + 33 - 34)", years[idx - 1]);
+        const prevNetBlock = getFieldValue("35. Net Block (32+33-34)", years[idx - 1]);
         const avgNetBlock = (netBlock + prevNetBlock) / 2;
         if (avgNetBlock) {
           fixedAssetsTurnoverRatio = totalOperatingIncome / avgNetBlock;
@@ -282,16 +295,16 @@ export const CreditAnalysisTool: React.FC = () => {
       newResults["Total Operating Income"][year] = totalOperatingIncome;
       newResults["EBITDA"][year] = ebitda;
       newResults["Depreciation"][year] = depreciation;
-      newResults["Interest"][year] = totalFinanceCharges;
-      newResults["Other Income"][year] = otherIncome;
-      newResults["Extraordinary expense"][year] = otherExpenses;
+      newResults["Interest"][year] = totalInterest;
+      newResults["Other Income"][year] = totalOtherIncome;
+      newResults["Extraordinary expense"][year] = totalOtherExpenses;
       newResults["Profit before tax"][year] = profitBeforeTax;
       newResults["Current Tax"][year] = currentTax;
       newResults["Deferred Tax"][year] = deferredTax;
       newResults["Profit after tax"][year] = profitAfterTax;
       newResults["Cash Profits (GCA)"][year] = cashProfits;
-      newResults["CFOA"][year] = totalOperatingIncome - costOfSales + otherIncome;
-      newResults["CFOA/EBITDA"][year] = ebitda ? (totalOperatingIncome - costOfSales + otherIncome) / ebitda : 0;
+      newResults["CFOA"][year] = totalOperatingIncome - costOfSales + totalOtherIncome;
+      newResults["CFOA/EBITDA"][year] = ebitda ? (totalOperatingIncome - costOfSales + totalOtherIncome) / ebitda : 0;
       
       newResults["Share Capital"][year] = ordinaryShareCapital;
       newResults["Tangible networth (TNW)"][year] = tangibleNetWorth;
@@ -342,16 +355,16 @@ export const CreditAnalysisTool: React.FC = () => {
       newResults["Cost of sales"][year] = costOfSales;
       newResults["Gross block of Fixed Assets"][year] = getFieldValue("32. Gross Block (land, building, machinery, WIP) Opening", year);
       newResults["Gross Debt availed"][year] = getFieldValue("Add: Debt availed-other", year);
-      newResults["Capex for creditors"][year] = getFieldValue("i.Deferred payment Credits (excluding instalments due within 1 year)", year);
+      newResults["Capex for creditors"][year] = getFieldValue("12. i. Deferred Payment Credits (excluding instalments due within 1 year)", year);
       newResults["Capex"][year] = getFieldValue("Capex", year);
       newResults["Repayment of TL"][year] = repaymentTL;
       newResults["Repayment of Vehicle loans"][year] = repaymentVehicle;
       
       // DSCR calculations
-      newResults["Cash available for debt servicing (A)"][year] = cashProfits + totalFinanceCharges;
-      newResults["Interest payment"][year] = totalFinanceCharges;
+      newResults["Cash available for debt servicing (A)"][year] = cashProfits + totalInterest;
+      newResults["Interest payment"][year] = totalInterest;
       newResults["Principal repayment"][year] = totalRepayments;
-      newResults["Total debt servicing (B)"][year] = totalFinanceCharges + totalRepayments;
+      newResults["Total debt servicing (B)"][year] = totalInterest + totalRepayments;
       newResults["DSCR (A/B)"][year] = dscr;
       
       // Additional calculations for other sections
