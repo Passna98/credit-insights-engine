@@ -17,19 +17,27 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
   updateFormData
 }) => {
   const fields = [
+    // 1. Gross Sales
     "1. Gross Sales",
     "1. Gross Sales - i. Export Sales",
-    "1. Gross Sales - ii. Domestic Sales", 
+    "1. Gross Sales - ii. Domestic Sales",
     "1. Gross Sales - iii. Services Sales",
+    "1. Gross Sales - i. Services Sales", // Added as per provided list
     "1. Gross Sales - Total",
+    // 2. Less Deductions
+    "2. Less Deductions", // Added as per provided list
     "2. Less Excise Duty/cess if any",
+    // 3. Net Sales
     "3. Net Sales (1-2)",
+    // 4. Other operating/revenue income
     "4. Other operating/revenue income",
     "4. Other operating/revenue income - i. Rental Income",
     "4. Other operating/revenue income - ii. Other Operating Income (Pls specify)",
     "4. Other operating/revenue income - iii. Other Operating Income (Pls specify)",
     "4. Other operating/revenue income - Total",
+    // 5. Net Operating Income
     "5. Net Operating Income (3+4)",
+    // 6. Cost of Sales
     "6. Cost of Sales",
     "Material consumed % of sales",
     "6. i. Raw materials CONSUMED",
@@ -52,12 +60,15 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
     "Labour % of manufacturing sales",
     "6. iv. Direct Labour (Factory wages)",
     "6. v. Other manufacturing expenses",
+    "6. vi. Repairs/maintenance/replacement etc.",
+    "6. vii. Other (Pls specify)",
+    "6. viii. Other (Pls specify)",
+    "6. ix. Other (Pls specify)",
+    "6. x. Other Mfg exp not covered above",
     "Dep % of GFA excl CWIP and Intangibles",
-    "6. vi. Depreciation",
+    "6. xi. Depreciation",
     "Amor % of Intangibles",
-    "6. vii. Amortisation",
-    "6. viii. Repairs/maintenance/replacement etc.",
-    "6. ix. Other Mfg exp not covered above",
+    "6. xii. Amortisation",
     "Total Mfg Exp (i to ix)",
     "6. i. Opening Stock-in-process",
     "6. ii. Closing Stock-in-process",
@@ -67,6 +78,7 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
     "6. ii. Closing Stock of finished goods",
     "Change in finished goods stock",
     "Cost of Goods Sold",
+    // 7. Selling, general and Admin exp
     "7. Selling, general and Admin exp",
     "Oth expenses % of sales",
     "7. i. Salary and staff expenses, director fee",
@@ -78,17 +90,28 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
     "7. vii. C&F Commission",
     "7. viii. Other exp- Research & development",
     "7. ix. Other exp- Royalty on sales",
-    "7. x. Other operating exp",
+    "7. x. Other (Pls specify)",
+    "7. xi. Other (Pls specify)",
+    "7. xii. Other (Pls specify)",
+    "7. xiii. Other (Pls specify)",
+    "7. xiv. Other operating exp",
     "Total Selling Gen & Admin Exp",
+    // 8. Sub-total (6+7) Cost of sales
     "8. Sub-total (6+7) Cost of sales",
+    // 9. Operating Profit before Interest (5-8)
     "9. Operating Profit before Interest (5-8)",
+    // 10. Finance Charges
     "10. Finance Charges",
     "10. i. Interest on Term Loans(Link from Repay Sch)",
     "10. ii. Interest on WCTL and DLOD",
     "10. iii. Interest on CC",
     "10. iv. Interest on vehicle loans",
     "10. v. Bank Charges/Others",
+    "10. vi. Other (Pls specify)",
+    "10. vii. Other (Pls specify)",
+    // 11. Operating Profit after Dep & Interest (9-10)
     "11. Operating Profit after Dep & Interest (9-10)",
+    // 12. Other non-operating Income
     "12. Other non-operating Income",
     "12. i. Dividends received",
     "12. ii. Extraordinary gains",
@@ -96,9 +119,15 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
     "12. iv. Gain on Exchange Fluctuations",
     "12. v. Misc. income/ Write backs etc",
     "12. vi. Interest from subsidiary",
-    "12. vii. Other Income",
+    "12. vii. Interest from others",
     "12. viii. Rental Income",
-    "12. A. Sub-total (Income)",
+    "12. ix. Other (Pls specify)",
+    "12. x. Other (Pls specify)",
+    "12. xi. Other (Pls specify)",
+    "12. xii. Other (Pls specify)",
+    "12. xiii. Other (Pls specify)",
+    "12. Sub-total (Income)",
+    // 12. Other non-operating expenses
     "12. Other non-operating expenses",
     "12. i. Prior Period Items",
     "12. ii. Extraordinary Losses",
@@ -108,22 +137,33 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
     "12. vi. Stock Writeoff on account of Covid",
     "12. vii. Exceptional Items",
     "12. viii. Others (Pls specify)",
+    "12. ix. Other (Pls specify)",
+    "12. x. Other (Pls specify)",
+    "12. xi. Other (Pls specify)",
+    "12. xii. Other (Pls specify)",
+    "12. xiii. Other (Pls specify)",
     "12. Sub-total (Expenses)",
     "12. Net of other non-operating income/ Exp",
+    // 13. Profit before tax/loss (11+12)
     "13. Profit before tax/loss (11+12)",
+    // 14. Tax
     "14. Tax",
     "Effective Tax rate",
     "14. i. Provision for taxes",
     "14. ii. Deferred Tax",
     "14. iii. Previous year adjustments",
     "14. Sub Total- Tax",
+    // 15. Net Profit / Loss (13-14)
     "15. Net Profit / Loss (13-14)",
+    // 16. Dividend Appropriations
     "16. Dividend Appropriations",
     "16. i. Interim Dividend",
     "16. ii. Proposed Dividend (Provision)",
     "16. iii. Tax on dividend",
     "16. Total Dividend Appropriation",
+    // 17. Retained Profit- P&L carried to Balance Sheet
     "17. Retained Profit- P&L carried to Balance Sheet",
+    // 18. Inputs for Computing Operating Leverage
     "18. Inputs for Computing Operating Leverage",
     "18. Variable Expenses (to be entered manually)",
     "18. Fixed Cost",

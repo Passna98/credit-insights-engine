@@ -33,42 +33,48 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
 
   const sections = [
     {
-      title: "1. FINANCIAL PERFORMANCE",
+      title: "FINANCIAL PERFORMANCE",
       subtitle: "(Amount in Cr.)",
       metrics: [
         "Total Operating Income",
-        "EBITDA", 
+        "EBITDA",
         "Depreciation",
         "Interest",
         "Other Income",
-        "Extraordinary expense",
+        "Other expense",
         "Profit before tax",
         "Current Tax",
         "Deferred Tax",
         "Profit after tax",
         "Cash Profits (GCA)",
-        "CFOA",
-        "CFOA/EBITDA"
+        "CFOA"
       ]
     },
     {
-      title: "2. CAPITAL STRUCTURE", 
-      subtitle: "(Amount in Cr.)",
+      title: "CAPITAL STRUCTURE",
+      subtitle: "",
       metrics: [
         "Share Capital",
-        "Tangible networth (TNW)",
+        "Tangible Net Worth (TNW)",
+        "Unsecured loan (Quasi eq.)",
         "Total debt",
-        "- Term debt",
-        "- Working capital debt",
-        "- Vehicle loans",
-        "- Unsecured loans",
+        "Term debt",
+        "WCTL",
+        "Working capital debt",
+        "Vehicle loans",
+        "Unsecured loans",
+        "SBLC/BG",
         "Capital employed",
         "Liquidity (Unencumbered)",
+        "Liquidity (Encumbered)",
+        "Investments",
+        "Investments - Group companies",
+        "Investments - Others",
         "Total outside liabilities (TOL)"
       ]
     },
     {
-      title: "3. KEY RATIOS",
+      title: "KEY RATIOS",
       subtitle: "GROWTH RATIOS",
       metrics: [
         "Sales growth",
@@ -78,16 +84,16 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
       ]
     },
     {
-      title: "4. PROFITABILITY RATIOS",
+      title: "PROFITABILITY RATIOS",
       subtitle: "",
       metrics: [
         "EBITDA Margin",
-        "PBT margin",
+        "PBT Margin",
         "PAT Margin"
       ]
     },
     {
-      title: "5. RETURN RATIOS",
+      title: "RETURN RATIOS",
       subtitle: "",
       metrics: [
         "Return on Capital Employed",
@@ -95,9 +101,10 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
       ]
     },
     {
-      title: "6. SOLVENCY RATIOS/COVERAGE RATIOS",
+      title: "SOLVENCY RATIOS/COVERAGE RATIOS",
       subtitle: "",
       metrics: [
+        "Average cost of borrowing",
         "Cash Profits/Debt Repay",
         "Debt Equity ratio",
         "Overall gearing",
@@ -110,42 +117,58 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
       ]
     },
     {
-      title: "7. LIQUIDITY RATIOS / TURNOVER RATIOS",
+      title: "LIQUIDITY RATIOS / TURNOVER RATIOS",
       subtitle: "",
       metrics: [
+        "Sales/WC debt",
+        "Avg WC Utilisation",
         "Current Ratio",
-        "Average debtor (days)",
-        "Average inventory (days)",
-        "Average payable (days)",
+        "Debtor (days)",
+        "Inventory (days)",
+        "Payable (days)",
         "Operating cycle (days)",
+        "Adj. Debtor (days) (incl adv to supp)",
+        "Inventory (days)",
+        "Adj. payable (days) (incl adv from cust)",
+        "Adj. operating cycle (days)",
+        "Gross Current Asset (days)",
         "Fixed Assets Turnover Ratio"
       ]
     },
     {
-      title: "8. OTHER DETAILS",
+      title: "OTHER DETAILS",
       subtitle: "(Amount in Cr.)",
       metrics: [
         "Total current assets",
+        "TCA except free liquidity",
         "Total current liabilities",
+        "TCL except fin liab",
+        "Net WC",
         "Gross Debtors",
+        "Advance to Suppliers",
         "Inventory",
         "Creditors",
+        "Advance from Customers",
         "Cost of goods sold",
         "Cost of sales",
-        "Gross block of Fixed Assets",
+        "A Gross FA incl CWIP",
+        "B Capex advance",
+        "C Creditors for capex",
+        "Capex (A1+B1+C1-A0-B0-C0)",
         "Gross Debt availed",
-        "Capex for creditors",
-        "Capex",
+        "Net block of Fixed Assets",
         "Repayment of TL",
-        "Repayment of Vehicle loans"
+        "Repayment of Vehicle loans",
+        "Repayment of WCTL"
       ]
     },
     {
-      title: "9. DSCR",
+      title: "DSCR",
       subtitle: "(Amount in Cr.)",
       metrics: [
         "Cash Profits (GCA)",
         "Add: Interest",
+        "Less: Internal Accruals",
         "Cash available for debt servicing (A)",
         "Interest payment",
         "Principal repayment",
@@ -154,20 +177,21 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
       ]
     },
     {
-      title: "10. CAPEX AND ITS FINANCING",
+      title: "CAPEX AND ITS FINANCING",
       subtitle: "(Amount in Cr.)",
       metrics: [
+        "FATR to compare with capex",
+        "% TL to capex",
         "Incremental capex",
-        "Effect of capex adv. & cred.",
         "Total term debt availed",
         "Funded from term debt",
         "Funded from unsec. loan",
-        "Funded from equity infusion",
+        "Funded from other source (Specify)",
         "Funded from Internal Accruals"
       ]
     },
     {
-      title: "11. DETAILS OF TERM DEBT",
+      title: "DETAILS OF TERM DEBT",
       subtitle: "(Amount in Cr.)",
       metrics: [
         "Opening debt",
@@ -177,7 +201,17 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
       ]
     },
     {
-      title: "12. DETAILS OF VEHICLE LOANS",
+      title: "DETAILS OF VEHICLE LOANS",
+      subtitle: "(Amount in Cr.)",
+      metrics: [
+        "Opening debt",
+        "Add: Debt availed-other",
+        "Less: Repayments",
+        "Closing debt"
+      ]
+    },
+    {
+      title: "DETAILS OF WCTL",
       subtitle: "(Amount in Cr.)",
       metrics: [
         "Opening debt",

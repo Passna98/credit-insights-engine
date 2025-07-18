@@ -15,7 +15,7 @@ export interface FormData {
 export const CreditAnalysisTool: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({});
   const [results, setResults] = useState<FormData>({});
-  const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027'];
+  const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029'];
 
   const updateFormData = (field: string, year: string, value: number) => {
     setFormData(prev => ({
@@ -37,21 +37,32 @@ export const CreditAnalysisTool: React.FC = () => {
     
     // Initialize all metrics
     const allMetrics = [
-      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense",
-      "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
-      "Share Capital", "Tangible networth (TNW)", "Total debt", "- Term debt", "- Working capital debt", "- Vehicle loans", "- Unsecured loans",
-      "Capital employed", "Liquidity (Unencumbered)", "Total outside liabilities (TOL)",
+      // FINANCIAL PERFORMANCE
+      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Other expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA",
+      // CAPITAL STRUCTURE
+      "Share Capital", "Tangible Net Worth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "Term debt", "WCTL", "Working capital debt", "Vehicle loans", "Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "Investments - Group companies", "Investments - Others", "Total outside liabilities (TOL)",
+      // KEY RATIOS
       "Sales growth", "EBITDA growth", "PBT growth", "PAT growth",
-      "EBITDA Margin", "PBT margin", "PAT Margin",
+      // PROFITABILITY RATIOS
+      "EBITDA Margin", "PBT Margin", "PAT Margin",
+      // RETURN RATIOS
       "Return on Capital Employed", "Return on Equity",
-      "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio",
-      "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)",
-      "Current Ratio", "Average debtor (days)", "Average inventory (days)", "Average payable (days)", "Operating cycle (days)", "Fixed Assets Turnover Ratio",
-      "Total current assets", "Total current liabilities", "Gross Debtors", "Inventory", "Creditors", "Cost of goods sold", "Cost of sales",
-      "Gross block of Fixed Assets", "Gross Debt availed", "Capex for creditors", "Capex", "Repayment of TL", "Repayment of Vehicle loans",
-      "Cash available for debt servicing (A)", "Interest payment", "Principal repayment", "Total debt servicing (B)", "DSCR (A/B)",
-      "Incremental capex", "Effect of capex adv. & cred.", "Total term debt availed", "Funded from term debt", "Funded from unsec. loan", "Funded from equity infusion", "Funded from Internal Accruals",
-      "Opening debt", "Add: Debt availed-other", "Less: Repayments", "Closing debt"
+      // SOLVENCY RATIOS/COVERAGE RATIOS
+      "Average cost of borrowing", "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio", "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)",
+      // LIQUIDITY RATIOS / TURNOVER RATIOS
+      "Sales/WC debt", "Avg WC Utilisation", "Current Ratio", "Debtor (days)", "Inventory (days)", "Payable (days)", "Operating cycle (days)", "Adj. Debtor (days) (incl adv to supp)", "Adj. payable (days) (incl adv from cust)", "Adj. operating cycle (days)", "Gross Current Asset (days)", "Fixed Assets Turnover Ratio",
+      // OTHER DETAILS
+      "Total current assets", "TCA except free liquidity", "Total current liabilities", "TCL except fin liab", "Net WC", "Gross Debtors", "Advance to Suppliers", "Inventory", "Creditors", "Advance from Customers", "Cost of goods sold", "Cost of sales", "A Gross FA incl CWIP", "B Capex advance", "C Creditors for capex", "Capex (A1+B1+C1-A0-B0-C0)", "Gross Debt availed", "Net block of Fixed Assets", "Repayment of TL", "Repayment of Vehicle loans", "Repayment of WCTL",
+      // DSCR
+      "Add: Interest", "Less: Internal Accruals", "Cash available for debt servicing (A)", "Interest payment", "Principal repayment", "Total debt servicing (B)", "DSCR (A/B)",
+      // CAPEX AND ITS FINANCING
+      "FATR to compare with capex", "% TL to capex", "Incremental capex", "Total term debt availed", "Funded from term debt", "Funded from unsec. loan", "Funded from other source (Specify)", "Funded from Internal Accruals",
+      // DETAILS OF TERM DEBT
+      "Opening debt", "Add: Debt availed-other", "Less: Repayments", "Closing debt",
+      // DETAILS OF VEHICLE LOANS
+      // (same as above, can be split if needed)
+      // DETAILS OF WCTL
+      "WCTL Opening debt", "WCTL Add: Debt availed-other", "WCTL Less: Repayments", "WCTL Closing debt"
     ];
 
     allMetrics.forEach(metric => {
@@ -380,6 +391,44 @@ export const CreditAnalysisTool: React.FC = () => {
       newResults["Add: Debt availed-other"][year] = getFieldValue("Add: Debt availed-other", year);
       newResults["Less: Repayments"][year] = getFieldValue("Less: Repayments", year);
       newResults["Closing debt"][year] = getFieldValue("Closing debt", year);
+
+      // Add calculations for new metrics below
+      // Placeholders for new metrics (replace with real formulas as needed)
+      newResults["Other expense"][year] = newResults["Extraordinary expense"]?.[year] || 0;
+      newResults["Tangible Net Worth (TNW)"][year] = newResults["Tangible networth (TNW)"]?.[year] || 0;
+      newResults["Unsecured loan (Quasi eq.)"][year] = getFieldValue("40. Unsecured Loans eligible for QE classification", year);
+      newResults["Term debt"][year] = newResults["- Term debt"]?.[year] || 0;
+      newResults["WCTL"][year] = getFieldValue("9B. WCTL and DLOD", year);
+      newResults["SBLC/BG"][year] = getFieldValue("# SBLC", year) + getFieldValue("$ BG (EPC)", year);
+      newResults["Liquidity (Encumbered)"][year] = getFieldValue("27. ii. Encumbered", year);
+      newResults["Investments"][year] = getFieldValue("27. Investments (other than long term)", year);
+      newResults["Investments - Group companies"][year] = getFieldValue("36. ii. Loans & Investments in Group companies/ subsidiaries", year);
+      newResults["Investments - Others"][year] = getFieldValue("36. iii. Non current Investment", year);
+      newResults["Working capital debt"][year] = newResults["- Working capital debt"]?.[year] || 0;
+      newResults["Vehicle loans"][year] = newResults["- Vehicle loans"]?.[year] || 0;
+      newResults["Unsecured loans"][year] = newResults["- Unsecured loans"]?.[year] || 0;
+      newResults["Advance to Suppliers"][year] = getFieldValue("30. i. Advances to suppliers of raw material/spares", year);
+      newResults["Advance from Customers"][year] = getFieldValue("4. Advance payments from customers /deposits from dealers", year);
+      newResults["A Gross FA incl CWIP"][year] = getFieldValue("32. Gross Block (land, building, machinery, WIP) Opening", year);
+      newResults["B Capex advance"][year] = getFieldValue("36. iv. Advances for capital goods/ contractors", year);
+      newResults["C Creditors for capex"][year] = getFieldValue("8. Creditors for Capex", year);
+      newResults["Capex (A1+B1+C1-A0-B0-C0)"][year] = 0; // Placeholder, needs period-over-period calculation
+      newResults["Net block of Fixed Assets"][year] = getFieldValue("35. Net Block (32+33-34)", year);
+      newResults["Repayment of WCTL"][year] = getFieldValue("Repayment of WCTL", year);
+      newResults["TCA except free liquidity"][year] = newResults["Total current assets"]?.[year] - newResults["Liquidity (Unencumbered)"]?.[year];
+      newResults["TCL except fin liab"][year] = newResults["Total current liabilities"]?.[year]; // Placeholder, adjust as needed
+      newResults["Net WC"][year] = newResults["Total current assets"]?.[year] - newResults["Total current liabilities"]?.[year];
+      newResults["Add: Interest"][year] = newResults["Interest"]?.[year] || 0;
+      newResults["Less: Internal Accruals"][year] = 0; // Placeholder, needs user input or further logic
+      newResults["FATR to compare with capex"][year] = 0; // Placeholder, needs formula
+      newResults["% TL to capex"][year] = 0; // Placeholder, needs formula
+      newResults["Funded from other source (Specify)"][year] = 0; // Placeholder, needs user input
+      // DETAILS OF WCTL
+      newResults["WCTL Opening debt"][year] = 0; // Placeholder, needs logic
+      newResults["WCTL Add: Debt availed-other"][year] = 0; // Placeholder, needs logic
+      newResults["WCTL Less: Repayments"][year] = 0; // Placeholder, needs logic
+      newResults["WCTL Closing debt"][year] = 0; // Placeholder, needs logic
+      // Add more calculations as needed for new metrics
     });
     
     console.log('Final results:', newResults);
