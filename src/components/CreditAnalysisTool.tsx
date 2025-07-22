@@ -31,6 +31,63 @@ export const CreditAnalysisTool: React.FC = () => {
     return formData[field]?.[year] || 0;
   };
 
+  const calculateCreditAnalysis = (fII: any[], fIII: any[]) => {
+    return fII.map((row: any, idx: number) => {
+      const balance = fIII[idx];
+
+      // Basic Calculations
+      const totalOperatingIncome = (row["Gross Sales"] || 0) - (row["Deductions"] || 0) + (row["Other Operating Income"] || 0);
+
+      const profitBeforeTax = (row["EBITDA"] || 0)
+        - (row["Depreciation"] || 0)
+        - (row["Interest"] || 0)
+        + (row["Other Income"] || 0)
+        - (row["Other Expenses"] || 0);
+
+      const profitAfterTax = profitBeforeTax
+        - (row["Current Tax"] || 0)
+        - (row["Deferred Tax"] || 0);
+
+      const cashProfitGCA = profitAfterTax + (row["Depreciation"] || 0);
+
+      // Ratios
+      const ebitdaMargin = ((row["EBITDA"] || 0) / totalOperatingIncome) * 100 || 0;
+      const pbtMargin = (profitBeforeTax / totalOperatingIncome) * 100 || 0;
+      const patMargin = (profitAfterTax / totalOperatingIncome) * 100 || 0;
+      const debtEquityRatio = (balance["Total Debt"] || 0) / (balance["Tangible Net Worth"] || 1);
+      const tolTnw = (balance["Total Liabilities"] || 0) / (balance["Tangible Net Worth"] || 1);
+      const roce = (profitBeforeTax / (balance["Total Assets"] || 1)) * 100 || 0;
+      const currentRatio = (balance["Current Assets"] || 0) / (balance["Current Liabilities"] || 1);
+      const fixedAssetTurnover = (totalOperatingIncome / (balance["Total Assets"] || 1)) || 0;
+      const dscr = (cashProfitGCA / ((row["Interest"] || 0) + (balance["Term Debt"] || 0) / 5)) || 0;
+
+      // CAPEX Financing
+      const incrementalCapex = (balance["Gross Block"] || 0) - (balance["Previous Gross Block"] || 0);
+      const fundedFromTermDebt = balance["Term Debt"] || 0;
+      const fundedFromUnsecuredLoan = balance["Unsecured Loans"] || 0;
+      const fundedFromOtherSources = balance["Other Sources"] || 0;
+
+      // Return result row
+      return {
+        Year: row["Year"],
+        "Total Operating Income": totalOperatingIncome.toFixed(2),
+        "EBITDA Margin (%)": ebitdaMargin.toFixed(2),
+        "PBT Margin (%)": pbtMargin.toFixed(2),
+        "PAT Margin (%)": patMargin.toFixed(2),
+        "Debt Equity Ratio": debtEquityRatio.toFixed(2),
+        "TOL/TNW": tolTnw.toFixed(2),
+        "ROCE (%)": roce.toFixed(2),
+        "Current Ratio": currentRatio.toFixed(2),
+        "Fixed Assets Turnover": fixedAssetTurnover.toFixed(2),
+        "DSCR": dscr.toFixed(2),
+        "Incremental CAPEX": incrementalCapex.toFixed(2),
+        "Funded from Term Debt": fundedFromTermDebt.toFixed(2),
+        "Funded from Unsecured Loan": fundedFromUnsecuredLoan.toFixed(2),
+        "Funded from Other Sources": fundedFromOtherSources.toFixed(2)
+      };
+    });
+  };
+
   const calculateResults = () => {
     console.log('Starting calculations with formData:', formData);
     const newResults: FormData = {};
@@ -40,7 +97,7 @@ export const CreditAnalysisTool: React.FC = () => {
       // FINANCIAL PERFORMANCE
       "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Other expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA",
       // CAPITAL STRUCTURE
-      "Share Capital", "Tangible Net Worth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "Term debt", "WCTL", "Working capital debt", "Vehicle loans", "Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "Investments - Group companies", "Investments - Others", "Total outside liabilities (TOL)",
+      "Share Capital", "Tangible Net Worth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "Term debt", "WCTL", "Working capital debt", "Vehicle loans", "Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "Group companies", "Others", "Total outside liabilities (TOL)",
       // KEY RATIOS
       "Sales growth", "EBITDA growth", "PBT growth", "PAT growth",
       // PROFITABILITY RATIOS
