@@ -33,14 +33,32 @@ export const CreditAnalysisTool: React.FC = () => {
 
   const calculateCreditAnalysis = (fII: any[], fIII: any[]) => {
     return fII.map((row: any, idx: number) => {
-      const balance = fIII[idx];
+      const balance = fIII[idx] || {};
 
-      // Basic Calculations
-      const totalOperatingIncome = (row["Gross Sales"] || 0) - (row["Deductions"] || 0) + (row["Other Operating Income"] || 0);
+      // ==========================
+      // 📄 F-II CALCULATIONS
+      // ==========================
+      const netSales = (row["Gross Sales"] || 0) - (row["Deductions"] || 0);
+      const netOperatingIncome = netSales + (row["Other Operating Income"] || 0);
 
-      const profitBeforeTax = (row["EBITDA"] || 0)
-        - (row["Depreciation"] || 0)
+      const totalMfgExp = (row["Raw Materials Consumed"] || 0) +
+                          (row["Power and Fuel"] || 0) +
+                          (row["Direct Labour"] || 0) +
+                          (row["Other Manufacturing Expenses"] || 0) +
+                          (row["Depreciation"] || 0) +
+                          (row["Amortisation"] || 0);
+
+      const cogs = totalMfgExp - (row["Closing Stock"] || 0) + (row["Opening Stock"] || 0);
+      const totalSellingAdminExp = (row["Salary Expenses"] || 0) +
+                                   (row["Rent Expenses"] || 0) +
+                                   (row["Other Admin Expenses"] || 0);
+
+      const totalCost = cogs + totalSellingAdminExp;
+      const ebitda = netOperatingIncome - totalCost;
+
+      const profitBeforeTax = ebitda
         - (row["Interest"] || 0)
+        - (row["Depreciation"] || 0)
         + (row["Other Income"] || 0)
         - (row["Other Expenses"] || 0);
 
@@ -50,40 +68,56 @@ export const CreditAnalysisTool: React.FC = () => {
 
       const cashProfitGCA = profitAfterTax + (row["Depreciation"] || 0);
 
-      // Ratios
-      const ebitdaMargin = ((row["EBITDA"] || 0) / totalOperatingIncome) * 100 || 0;
-      const pbtMargin = (profitBeforeTax / totalOperatingIncome) * 100 || 0;
-      const patMargin = (profitAfterTax / totalOperatingIncome) * 100 || 0;
+      // ==========================
+      // 📊 CREDIT ANALYSIS RATIOS
+      // ==========================
+      const ebitdaMargin = (ebitda / netOperatingIncome) * 100 || 0;
+      const pbtMargin = (profitBeforeTax / netOperatingIncome) * 100 || 0;
+      const patMargin = (profitAfterTax / netOperatingIncome) * 100 || 0;
+
       const debtEquityRatio = (balance["Total Debt"] || 0) / (balance["Tangible Net Worth"] || 1);
       const tolTnw = (balance["Total Liabilities"] || 0) / (balance["Tangible Net Worth"] || 1);
-      const roce = (profitBeforeTax / (balance["Total Assets"] || 1)) * 100 || 0;
-      const currentRatio = (balance["Current Assets"] || 0) / (balance["Current Liabilities"] || 1);
-      const fixedAssetTurnover = (totalOperatingIncome / (balance["Total Assets"] || 1)) || 0;
-      const dscr = (cashProfitGCA / ((row["Interest"] || 0) + (balance["Term Debt"] || 0) / 5)) || 0;
 
+      const roce = (profitBeforeTax / (balance["Capital Employed"] || 1)) * 100 || 0;
+
+      const currentRatio = (balance["Current Assets"] || 0) / (balance["Current Liabilities"] || 1);
+      const fixedAssetTurnover = (netOperatingIncome / (balance["Gross Block"] || 1)) || 0;
+
+      const dscr = (cashProfitGCA / ((row["Interest"] || 0) + (balance["Term Debt"] || 0) / 5)) || 0; // assuming 5-year repayment
+
+      const operatingCycle = ((balance["Debtors (days)"] || 0) +
+                              (balance["Inventory (days)"] || 0) -
+                              (balance["Payables (days)"] || 0)) || 0;
+
+      // ==========================
       // CAPEX Financing
-      const incrementalCapex = (balance["Gross Block"] || 0) - (balance["Previous Gross Block"] || 0);
+      // ==========================
+      const incrementalCapex = ((balance["Gross Block"] || 0) - (balance["Previous Gross Block"] || 0)) || 0;
       const fundedFromTermDebt = balance["Term Debt"] || 0;
       const fundedFromUnsecuredLoan = balance["Unsecured Loans"] || 0;
-      const fundedFromOtherSources = balance["Other Sources"] || 0;
 
-      // Return result row
+      // ==========================
+      // RETURN RESULT ROW
+      // ==========================
       return {
         Year: row["Year"],
-        "Total Operating Income": totalOperatingIncome.toFixed(2),
+        "Net Sales": netSales.toFixed(2),
+        "Net Operating Income": netOperatingIncome.toFixed(2),
+        "EBITDA": ebitda.toFixed(2),
         "EBITDA Margin (%)": ebitdaMargin.toFixed(2),
         "PBT Margin (%)": pbtMargin.toFixed(2),
         "PAT Margin (%)": patMargin.toFixed(2),
+        "Cash Profit (GCA)": cashProfitGCA.toFixed(2),
         "Debt Equity Ratio": debtEquityRatio.toFixed(2),
         "TOL/TNW": tolTnw.toFixed(2),
         "ROCE (%)": roce.toFixed(2),
         "Current Ratio": currentRatio.toFixed(2),
         "Fixed Assets Turnover": fixedAssetTurnover.toFixed(2),
         "DSCR": dscr.toFixed(2),
+        "Operating Cycle (days)": operatingCycle.toFixed(2),
         "Incremental CAPEX": incrementalCapex.toFixed(2),
         "Funded from Term Debt": fundedFromTermDebt.toFixed(2),
-        "Funded from Unsecured Loan": fundedFromUnsecuredLoan.toFixed(2),
-        "Funded from Other Sources": fundedFromOtherSources.toFixed(2)
+        "Funded from Unsecured Loan": fundedFromUnsecuredLoan.toFixed(2)
       };
     });
   };
