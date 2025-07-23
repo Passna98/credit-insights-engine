@@ -394,9 +394,9 @@ export const CreditAnalysisTool: React.FC = () => {
     // Initialize all metrics
     const allMetrics = [
       // FINANCIAL PERFORMANCE
-      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Other expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA",
+      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
       // CAPITAL STRUCTURE
-      "Share Capital", "Tangible Net Worth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "Term debt", "WCTL", "Working capital debt", "Vehicle loans", "Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "Group companies", "Others", "Total outside liabilities (TOL)",
+      "Share Capital", "Tangible networth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "- Term debt", "- WCTL", "- Working capital debt", "- Vehicle loans", "- Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "- Group companies", "- Others", "Total outside liabilities (TOL)",
       // KEY RATIOS
       "Sales growth", "EBITDA growth", "PBT growth", "PAT growth",
       // PROFITABILITY RATIOS
@@ -404,9 +404,9 @@ export const CreditAnalysisTool: React.FC = () => {
       // RETURN RATIOS
       "Return on Capital Employed", "Return on Equity",
       // SOLVENCY RATIOS/COVERAGE RATIOS
-      "Average cost of borrowing", "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio", "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)",
+      "Average cost of borrowing", "Cash Profits/Debt Repay", "Debt Equity ratio", "Overall gearing", "TOL/TNW", "Interest Coverage Ratio", "Debt Service Coverage Ratio", "Total debt/Cash Profits", "Term debt/Cash Profits", "Total debt/EBITDA (Lev.)", "Sales/WC debt",
       // LIQUIDITY RATIOS / TURNOVER RATIOS
-      "Sales/WC debt", "Avg WC Utilisation", "Current Ratio", "Debtor (days)", "Inventory (days)", "Payable (days)", "Operating cycle (days)", "Adj. Debtor (days) (incl adv to supp)", "Adj. payable (days) (incl adv from cust)", "Adj. operating cycle (days)", "Gross Current Asset (days)", "Fixed Assets Turnover Ratio",
+      "Avg WC Utilisation", "Current Ratio", "Debtor (days)", "Inventory (days)", "Payable (days)", "Operating cycle (days)", "Adj. Debtor (days) (incl adv to supp)", "Adj. payable (days) (incl adv from cust)", "Adj. operating cycle (days)", "Gross Current Asset (days)", "Fixed Assets Turnover Ratio",
       // OTHER DETAILS
       "Total current assets", "TCA except free liquidity", "Total current liabilities", "TCL except fin liab", "Net WC", "Gross Debtors", "Advance to Suppliers", "Inventory", "Creditors", "Advance from Customers", "Cost of goods sold", "Cost of sales", "A Gross FA incl CWIP", "B Capex advance", "C Creditors for capex", "Capex (A1+B1+C1-A0-B0-C0)", "Gross Debt availed", "Net block of Fixed Assets", "Repayment of TL", "Repayment of Vehicle loans", "Repayment of WCTL",
       // DSCR
@@ -690,7 +690,7 @@ export const CreditAnalysisTool: React.FC = () => {
       newResults["PAT growth"][year] = patGrowth;
       
       newResults["EBITDA Margin"][year] = ebitdaMargin;
-      newResults["PBT margin"][year] = pbtMargin;
+      newResults["PBT Margin"][year] = pbtMargin;
       newResults["PAT Margin"][year] = patMargin;
       
       newResults["Return on Capital Employed"][year] = returnOnCapitalEmployed;
