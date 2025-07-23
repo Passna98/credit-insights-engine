@@ -18,13 +18,18 @@ export const CreditAnalysisTool: React.FC = () => {
   const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029'];
 
   const updateFormData = (field: string, year: string, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        [year]: value || 0
-      }
-    }));
+    console.log('updateFormData called:', { field, year, value });
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: {
+          ...prev[field],
+          [year]: value || 0
+        }
+      };
+      console.log('Updated formData:', newData);
+      return newData;
+    });
   };
 
   const getFieldValue = (field: string, year: string): number => {
@@ -389,6 +394,12 @@ export const CreditAnalysisTool: React.FC = () => {
 
   const calculateResults = () => {
     console.log('Starting calculations with formData:', formData);
+    console.log('FormData keys:', Object.keys(formData));
+    console.log('Sample field values:', {
+      'grossSales': formData["1. Gross Sales - Total"],
+      'exciseDuty': formData["2. Less Excise Duty/cess if any"],
+      'costOfSales': formData["8. Sub-total (6+7) Cost of sales"]
+    });
     const newResults: FormData = {};
     
     // Initialize all metrics
