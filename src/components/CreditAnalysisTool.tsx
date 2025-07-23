@@ -878,7 +878,16 @@ export const CreditAnalysisTool: React.FC = () => {
         </Tabs>
 
         <div className="flex gap-4 mt-6 justify-center">
-          <Button onClick={calculateResults} className="flex items-center gap-2">
+          <Button onClick={() => {
+            console.log('Calculate button clicked');
+            console.log('Current formData state:', formData);
+            console.log('FormData has keys:', Object.keys(formData).length);
+            if (Object.keys(formData).length === 0) {
+              alert('No data entered! Please enter some values in the forms first.');
+              return;
+            }
+            calculateResults();
+          }} className="flex items-center gap-2">
             <Calculator className="h-4 w-4" />
             Calculate Output
           </Button>
