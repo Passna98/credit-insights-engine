@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { validateFinancialInput } from "@/lib/validation";
 
 interface BalanceSheetFormProps {
   years: string[];
@@ -259,10 +260,17 @@ export const BalanceSheetForm: React.FC<BalanceSheetFormProps> = ({
                         ) : (
                           <Input
                             type="number"
+                            min="0"
                             step="0.01"
-                            className="w-full"
                             value={formData[field]?.[year] || ''}
-                            onChange={(e) => updateFormData(field, year, parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const validation = validateFinancialInput(e.target.value);
+                              if (validation.isValid) {
+                                updateFormData(field, year, validation.parsedValue);
+                              }
+                            }}
+                            className="w-full text-right"
+                            placeholder="0"
                           />
                         )}
                       </td>
