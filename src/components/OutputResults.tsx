@@ -68,8 +68,8 @@ export const OutputResults: React.FC<OutputResultsProps> = ({ years, results }) 
         "Liquidity (Unencumbered)",
         "Liquidity (Encumbered)",
         "Investments",
-        "Group companies",
-        "Others",
+        "Investments - Group companies",
+        "Investments - Others",
         "Total outside liabilities (TOL)"
       ]
     },

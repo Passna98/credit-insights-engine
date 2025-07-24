@@ -1,11 +1,5 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import {
-  NameType,
-  Payload,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent"
-import DOMPurify from "dompurify"
 
 import { cn } from "@/lib/utils"
 
@@ -80,38 +74,25 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
-  // Sanitize colors to prevent XSS
-  const sanitizeColor = (color: string): string => {
-    // Only allow hex colors, rgb/rgba, hsl/hsla, and named colors
-    const colorRegex = /^(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|[a-zA-Z]+)$/;
-    return colorRegex.test(color) ? color : "#000000";
-  };
-
-  const sanitizedHTML = DOMPurify.sanitize(
-    Object.entries(THEMES)
-      .map(
-        ([theme, prefix]) => `
+  return (
+    <style
+      dangerouslySetInnerHTML={{
+        __html: Object.entries(THEMES)
+          .map(
+            ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${sanitizeColor(color)};` : null
+    return color ? `  --color-${key}: ${color};` : null
   })
-  .filter(Boolean)
   .join("\n")}
 }
 `
-      )
-      .join("\n"),
-    { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }
-  );
-
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: sanitizedHTML,
+          )
+          .join("\n"),
       }}
     />
   )

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { validateFinancialInput, validatePercentageInput } from "@/lib/validation";
 
 interface OperatingStatementFormProps {
   years: string[];
@@ -217,19 +216,7 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
                     </td>
                     {years.map(year => (
                       <td key={year} className="p-2 border-b">
-                        {/* Only hide inputs for calculated totals and section headers - be very specific */}
-                        {field === "3. Net Sales (1-2)" || 
-                         field === "5. Net Operating Income (3+4)" ||
-                         field === "8. Sub-total (6+7) Cost of sales" ||
-                         field === "10. Total Operating Expenses (8+9)" ||
-                         field === "11. Operating Profit before Interest (5-10)" ||
-                         field === "13. Total Finance Cost (11+12)" ||
-                         field === "14. Profit/(Loss) before Tax (11-13)" ||
-                         field === "16. Profit/(Loss) after Tax (14-15)" ? (
-                          <div className="w-full h-9 flex items-center justify-center text-gray-400 text-sm">
-                            {formData[field]?.[year] ? formData[field][year].toLocaleString() : '-'}
-                          </div>
-                        ) : field.includes('%') || field.includes('rate') ? (
+                        {field.includes('%') || field.includes('rate') ? (
                           <Input
                             type="number"
                             step="0.01"
@@ -241,21 +228,10 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
                         ) : (
                           <Input
                             type="number"
-                            min="0"
                             step="0.01"
+                            className="w-full"
                             value={formData[field]?.[year] || ''}
-                            onChange={(e) => {
-                              const isPercentage = field.toLowerCase().includes('%') || field.toLowerCase().includes('percent');
-                              const validation = isPercentage 
-                                ? validatePercentageInput(e.target.value)
-                                : validateFinancialInput(e.target.value);
-                              
-                              if (validation.isValid) {
-                                updateFormData(field, year, validation.parsedValue);
-                              }
-                            }}
-                            className="w-full text-right"
-                            placeholder="0"
+                            onChange={(e) => updateFormData(field, year, parseFloat(e.target.value) || 0)}
                           />
                         )}
                       </td>
