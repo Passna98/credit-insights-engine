@@ -7,6 +7,8 @@ import { BalanceSheetForm } from './BalanceSheetForm';
 import { OutputResults } from './OutputResults';
 import { Calculator, Trash2, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { ErrorBoundary } from './ErrorBoundary';
+import { safeDivide } from '@/lib/validation';
 
 export interface FormData {
   [key: string]: { [year: string]: number };
@@ -28,7 +30,8 @@ export const CreditAnalysisTool: React.FC = () => {
   };
 
   const getFieldValue = (field: string, year: string): number => {
-    return formData[field]?.[year] || 0;
+    const value = formData[field]?.[year] || 0;
+    return isFinite(value) ? value : 0;
   };
 
   const calculateCreditAnalysis = (fII: any[], fIII: any[]) => {
@@ -43,11 +46,14 @@ export const CreditAnalysisTool: React.FC = () => {
       // Total Operating Income = Net Operating Income (3+4) of F-II
       const totalOperatingIncome = (row["Net Operating Income"] || 0);
       
-      // EBITDA = Operating Profit before Interest + Depreciation + Amortisation
-      const ebitda = (row["Operating Profit before Interest"] || 0) + (row["Depreciation"] || 0) + (row["Amortisation"] || 0);
+      // EBITDA = Operating Profit before Interest + Depreciation + Amortisation  
+      const operatingProfit = row["Operating Profit before Interest"] || 0;
+      const depreciationAmount = row["Depreciation"] || 0;
+      const amortisationAmount = row["Amortisation"] || 0;
+      const ebitda = operatingProfit + depreciationAmount + amortisationAmount;
       
       // Depreciation = Depreciation + Amortisation of F-II
-      const depreciation = (row["Depreciation"] || 0) + (row["Amortisation"] || 0);
+      const depreciation = depreciationAmount + amortisationAmount;
       
       // Interest = Finance Charges of F-II
       const interest = row["Finance Charges"] || 0;
@@ -133,24 +139,32 @@ export const CreditAnalysisTool: React.FC = () => {
       // ==========================
       // GROWTH RATIOS
       // ==========================
-      const salesGrowth = prevRow["Total Operating Income"] ? 
-        ((totalOperatingIncome - prevRow["Total Operating Income"]) / Math.abs(prevRow["Total Operating Income"])) * 100 : 0;
+      const salesGrowth = safeDivide(
+        totalOperatingIncome - (prevRow["Total Operating Income"] || 0),
+        Math.abs(prevRow["Total Operating Income"] || 1)
+      ) * 100;
       
-      const ebitdaGrowth = prevRow["EBITDA"] ? 
-        ((ebitda - prevRow["EBITDA"]) / Math.abs(prevRow["EBITDA"])) * 100 : 0;
+      const ebitdaGrowth = safeDivide(
+        ebitda - (prevRow["EBITDA"] || 0),
+        Math.abs(prevRow["EBITDA"] || 1)
+      ) * 100;
       
-      const pbtGrowth = prevRow["Profit before tax"] ? 
-        ((profitBeforeTax - prevRow["Profit before tax"]) / Math.abs(prevRow["Profit before tax"])) * 100 : 0;
+      const pbtGrowth = safeDivide(
+        profitBeforeTax - (prevRow["Profit before tax"] || 0),
+        Math.abs(prevRow["Profit before tax"] || 1)
+      ) * 100;
       
-      const patGrowth = prevRow["Profit after tax"] ? 
-        ((profitAfterTax - prevRow["Profit after tax"]) / Math.abs(prevRow["Profit after tax"])) * 100 : 0;
+      const patGrowth = safeDivide(
+        profitAfterTax - (prevRow["Profit after tax"] || 0),
+        Math.abs(prevRow["Profit after tax"] || 1)
+      ) * 100;
 
       // ==========================
       // PROFITABILITY RATIOS
       // ==========================
-      const ebitdaMargin = totalOperatingIncome ? (ebitda / totalOperatingIncome) * 100 : 0;
-      const pbtMargin = totalOperatingIncome ? (profitBeforeTax / totalOperatingIncome) * 100 : 0;
-      const patMargin = totalOperatingIncome ? (profitAfterTax / totalOperatingIncome) * 100 : 0;
+      const ebitdaMargin = safeDivide(ebitda, totalOperatingIncome) * 100;
+      const pbtMargin = safeDivide(profitBeforeTax, totalOperatingIncome) * 100;
+      const patMargin = safeDivide(profitAfterTax, totalOperatingIncome) * 100;
 
       // ==========================
       // RETURN RATIOS
@@ -843,15 +857,16 @@ export const CreditAnalysisTool: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">
-              Credit Analysis Tool - Excel Like Interface
-            </CardTitle>
-          </CardHeader>
-        </Card>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-3xl font-bold text-center">
+                Credit Analysis Tool - Excel Like Interface
+              </CardTitle>
+            </CardHeader>
+          </Card>
 
         <Tabs defaultValue="operating" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
@@ -897,5 +912,6 @@ export const CreditAnalysisTool: React.FC = () => {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
