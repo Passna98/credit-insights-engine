@@ -409,7 +409,7 @@ export const CreditAnalysisTool: React.FC = () => {
     // Initialize all metrics
     const allMetrics = [
       // FINANCIAL PERFORMANCE
-      "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
+      "Net Sales", "Total Operating Income", "EBITDA", "Depreciation", "Interest", "Other Income", "Extraordinary expense", "Profit before tax", "Current Tax", "Deferred Tax", "Profit after tax", "Cash Profits (GCA)", "CFOA", "CFOA/EBITDA",
       // CAPITAL STRUCTURE
       "Share Capital", "Tangible networth (TNW)", "Unsecured loan (Quasi eq.)", "Total debt", "- Term debt", "- WCTL", "- Working capital debt", "- Vehicle loans", "- Unsecured loans", "SBLC/BG", "Capital employed", "Liquidity (Unencumbered)", "Liquidity (Encumbered)", "Investments", "- Group companies", "- Others", "Total outside liabilities (TOL)",
       // KEY RATIOS

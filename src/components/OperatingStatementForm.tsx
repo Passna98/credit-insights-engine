@@ -216,14 +216,15 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
                     </td>
                     {years.map(year => (
                       <td key={year} className="p-2 border-b">
-                        {/* Don't render inputs for section headers, totals, or calculated fields */}
-                        {field.includes('Total') || field.includes('Sub-total') || 
-                         /^\d+\./.test(field) && !field.includes(' - ') ||
-                         field.includes('Change in') || 
-                         field.includes('Net Operating Income') ||
-                         field.includes('Net Sales') ||
-                         field.includes('Less Deductions') ||
-                         field.includes('Cost of Sales') && !field.includes('i.') && !field.includes('ii.') ? (
+                        {/* Only hide inputs for calculated totals and section headers - be very specific */}
+                        {field === "3. Net Sales (1-2)" || 
+                         field === "5. Net Operating Income (3+4)" ||
+                         field === "8. Sub-total (6+7) Cost of sales" ||
+                         field === "10. Total Operating Expenses (8+9)" ||
+                         field === "11. Operating Profit before Interest (5-10)" ||
+                         field === "13. Total Finance Cost (11+12)" ||
+                         field === "14. Profit/(Loss) before Tax (11-13)" ||
+                         field === "16. Profit/(Loss) after Tax (14-15)" ? (
                           <div className="w-full h-9 flex items-center justify-center text-gray-400 text-sm">
                             {formData[field]?.[year] ? formData[field][year].toLocaleString() : '-'}
                           </div>
