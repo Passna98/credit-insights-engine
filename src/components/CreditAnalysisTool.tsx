@@ -388,13 +388,22 @@ export const CreditAnalysisTool: React.FC = () => {
   };
 
   const calculateResults = () => {
-    console.log('Starting calculations with formData:', formData);
+    console.log('=== CALCULATE RESULTS CLICKED ===');
+    console.log('Current formData:', formData);
+    console.log('FormData keys count:', Object.keys(formData).length);
     console.log('FormData keys:', Object.keys(formData));
-    console.log('Sample field values:', {
-      'grossSales': formData["1. Gross Sales - Total"],
-      'exciseDuty': formData["2. Less Excise Duty/cess if any"],
-      'costOfSales': formData["8. Sub-total (6+7) Cost of sales"]
-    });
+    
+    // Check specific fields we know should have data
+    console.log('Sample field checks:');
+    console.log('- formData["1. Gross Sales - Total"]:', formData["1. Gross Sales - Total"]);
+    console.log('- formData["Net Sales"]:', formData["Net Sales"]);
+    console.log('- formData["Cost of Sales"]:', formData["Cost of Sales"]);
+    
+    if (Object.keys(formData).length === 0) {
+      alert('No data found in formData. Please check if form inputs are working.');
+      return;
+    }
+    
     const newResults: FormData = {};
     
     // Initialize all metrics
