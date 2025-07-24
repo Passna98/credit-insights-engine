@@ -216,7 +216,18 @@ export const OperatingStatementForm: React.FC<OperatingStatementFormProps> = ({
                     </td>
                     {years.map(year => (
                       <td key={year} className="p-2 border-b">
-                        {field.includes('%') || field.includes('rate') ? (
+                        {/* Don't render inputs for section headers, totals, or calculated fields */}
+                        {field.includes('Total') || field.includes('Sub-total') || 
+                         /^\d+\./.test(field) && !field.includes(' - ') ||
+                         field.includes('Change in') || 
+                         field.includes('Net Operating Income') ||
+                         field.includes('Net Sales') ||
+                         field.includes('Less Deductions') ||
+                         field.includes('Cost of Sales') && !field.includes('i.') && !field.includes('ii.') ? (
+                          <div className="w-full h-9 flex items-center justify-center text-gray-400 text-sm">
+                            {formData[field]?.[year] ? formData[field][year].toLocaleString() : '-'}
+                          </div>
+                        ) : field.includes('%') || field.includes('rate') ? (
                           <Input
                             type="number"
                             step="0.01"

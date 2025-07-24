@@ -18,18 +18,13 @@ export const CreditAnalysisTool: React.FC = () => {
   const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029'];
 
   const updateFormData = (field: string, year: string, value: number) => {
-    console.log('updateFormData called:', { field, year, value });
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: {
-          ...prev[field],
-          [year]: value || 0
-        }
-      };
-      console.log('Updated formData:', newData);
-      return newData;
-    });
+    setFormData(prev => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        [year]: value || 0
+      }
+    }));
   };
 
   const getFieldValue = (field: string, year: string): number => {
@@ -878,16 +873,7 @@ export const CreditAnalysisTool: React.FC = () => {
         </Tabs>
 
         <div className="flex gap-4 mt-6 justify-center">
-          <Button onClick={() => {
-            console.log('Calculate button clicked');
-            console.log('Current formData state:', formData);
-            console.log('FormData has keys:', Object.keys(formData).length);
-            if (Object.keys(formData).length === 0) {
-              alert('No data entered! Please enter some values in the forms first.');
-              return;
-            }
-            calculateResults();
-          }} className="flex items-center gap-2">
+          <Button onClick={calculateResults} className="flex items-center gap-2">
             <Calculator className="h-4 w-4" />
             Calculate Output
           </Button>
