@@ -44,34 +44,34 @@ export const CreditAnalysisTool: React.FC = () => {
       // FINANCIAL PERFORMANCE
       // ==========================
       // Total Operating Income = Net Operating Income (3+4) of F-II
-      const totalOperatingIncome = (row["Net Operating Income"] || 0);
+      const totalOperatingIncome = (row["5. Net Operating Income (3+4)"] || 0);
       
       // EBITDA = Operating Profit before Interest + Depreciation + Amortisation  
-      const operatingProfit = row["Operating Profit before Interest"] || 0;
-      const depreciationAmount = row["Depreciation"] || 0;
-      const amortisationAmount = row["Amortisation"] || 0;
+      const operatingProfit = row["11. Operating Profit before Interest (5-10)"] || 0;
+      const depreciationAmount = row["9. i. Depreciation"] || 0;
+      const amortisationAmount = row["9. ii. Amortisation"] || 0;
       const ebitda = operatingProfit + depreciationAmount + amortisationAmount;
       
       // Depreciation = Depreciation + Amortisation of F-II
       const depreciation = depreciationAmount + amortisationAmount;
       
       // Interest = Finance Charges of F-II
-      const interest = row["Finance Charges"] || 0;
+      const interest = row["12. Finance Charges"] || 0;
       
       // Other Income = Sub-total (Income) of F-II
       const otherIncome = row["Sub-total (Income)"] || 0;
       
-      // Other expense = Sub-total (Expenses) of F-II
+      // Other expense = Sub-total (Expenses) of F-II  
       const otherExpense = row["Sub-total (Expenses)"] || 0;
       
       // Profit before tax = EBITDA - Depreciation - Interest + Other Income - Other expense
       const profitBeforeTax = ebitda - depreciation - interest + otherIncome - otherExpense;
       
       // Current Tax = Provision for taxes + Previous year adjustments of F-II
-      const currentTax = (row["Provision for taxes"] || 0) + (row["Previous year adjustments"] || 0);
+      const currentTax = (row["14. i. Provision for taxes"] || 0) + (row["Previous year adjustments"] || 0);
       
       // Deferred Tax = Deferred Tax of F-II
-      const deferredTax = row["Deferred Tax"] || 0;
+      const deferredTax = row["14. ii. Deferred Tax"] || 0;
       
       // Profit after tax = Profit before tax - Current Tax - Deferred Tax
       const profitAfterTax = profitBeforeTax - currentTax - deferredTax;
@@ -457,24 +457,45 @@ export const CreditAnalysisTool: React.FC = () => {
     years.forEach((year, idx) => {
       console.log(`Calculating for year ${year}:`);
       
+      // Debug: Show what fields have data for this year
+      const fieldsWithData = Object.keys(formData).filter(field => formData[field]?.[year] > 0);
+      console.log(`Fields with data for ${year}:`, fieldsWithData);
+      console.log(`Sample field values for ${year}:`, 
+        fieldsWithData.slice(0, 5).map(field => ({ field, value: formData[field][year] })));
+      
+      
       // Basic P&L calculations using correct field names
-      const grossSalesTotal = getFieldValue("1. Gross Sales - Total", year);
-      const exciseDuty = getFieldValue("2. Less Excise Duty/cess if any", year);
-      const netSales = grossSalesTotal - exciseDuty;
+      // First, let's try to get net sales from the calculated field, or calculate from gross sales
+      let netSales = getFieldValue("3. Net Sales (1-2)", year);
+      if (netSales === 0) {
+        const grossSalesTotal = getFieldValue("1. Gross Sales - Total", year);
+        const exciseDuty = getFieldValue("2. Less Excise Duty/cess if any", year);
+        netSales = grossSalesTotal - exciseDuty;
+      }
       console.log(`Net Sales for ${year}:`, netSales);
       
-      // Other operating income
-      const rentalIncome = getFieldValue("4. Other operating/revenue income - i. Rental Income", year);
-      const otherOpIncome1 = getFieldValue("4. Other operating/revenue income - ii. Other Operating Income (Pls specify)", year);
-      const otherOpIncome2 = getFieldValue("4. Other operating/revenue income - iii. Other Operating Income (Pls specify)", year);
-      const otherOpIncomeTotal = getFieldValue("4. Other operating/revenue income - Total", year) || (rentalIncome + otherOpIncome1 + otherOpIncome2);
-      
-      // Total Operating Income = Net Sales + Other Operating Income
-      const totalOperatingIncome = netSales + otherOpIncomeTotal;
+      // Other operating income - try calculated field first, then sum components
+      let totalOperatingIncome = getFieldValue("5. Net Operating Income (3+4)", year);
+      if (totalOperatingIncome === 0) {
+        const rentalIncome = getFieldValue("4. Other operating/revenue income - i. Rental Income", year);
+        const otherOpIncome1 = getFieldValue("4. Other operating/revenue income - ii. Other Operating Income (Pls specify)", year);
+        const otherOpIncome2 = getFieldValue("4. Other operating/revenue income - iii. Other Operating Income (Pls specify)", year);
+        const otherOpIncomeTotal = getFieldValue("4. Other operating/revenue income - Total", year) || (rentalIncome + otherOpIncome1 + otherOpIncome2);
+        
+        // Total Operating Income = Net Sales + Other Operating Income
+        totalOperatingIncome = netSales + otherOpIncomeTotal;
+      }
       console.log(`Total Operating Income for ${year}:`, totalOperatingIncome);
       
-      // Cost of sales calculation
-      const costOfSales = getFieldValue("8. Sub-total (6+7) Cost of sales", year);
+      // Cost of sales calculation - try calculated field first
+      let costOfSales = getFieldValue("8. Sub-total (6+7) Cost of sales", year);
+      if (costOfSales === 0) {
+        // Calculate from components if the total isn't available
+        const rawMaterialsConsumed = getFieldValue("6. i. Raw materials CONSUMED", year);
+        const purchaseOfStockIntrade = getFieldValue("6. ii. Purchase of stock-in-trade", year);
+        const changesInInventory = getFieldValue("7. Changes in inventories of finished goods, WIP and stock-in-trade", year);
+        costOfSales = rawMaterialsConsumed + purchaseOfStockIntrade + changesInInventory;
+      }
       console.log(`Cost of Sales for ${year}:`, costOfSales);
       
       // Operating Profit before Interest = Total Operating Income - Cost of Sales
@@ -688,6 +709,7 @@ export const CreditAnalysisTool: React.FC = () => {
       }
       
       // Store all calculated values
+      newResults["Net Sales"][year] = netSales;
       newResults["Total Operating Income"][year] = totalOperatingIncome;
       newResults["EBITDA"][year] = ebitda;
       newResults["Depreciation"][year] = depreciation;
