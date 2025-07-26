@@ -3,7 +3,7 @@ import { z } from "zod";
 // Financial input validation schema
 export const financialInputSchema = z.object({
   value: z.number()
-    .min(0, "Value cannot be negative")
+    .min(-9999999999, "Value is too small")
     .max(9999999999, "Value is too large")
     .finite("Value must be a finite number"),
 });
@@ -29,7 +29,7 @@ export const safeDivide = (numerator: number, denominator: number): number => {
 export const safeParseFloat = (value: string): number => {
   if (!value || value.trim() === '') return 0;
   const parsed = parseFloat(value);
-  return isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  return isFinite(parsed) ? parsed : 0;
 };
 
 // Validate financial input
